@@ -1,17 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Titan Real Estate</title>
+  @vite(['resources/css/app.css', 'resources/css/app.css'])
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <script src="https://cdn.tailwindcss.com"></script>
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="icon" type="icon" href="{{ asset('images/icon.jpg') }}">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 </head>
-
-<body class="font-sans antialiased">
+<style type="text/css">
+  *{
+    font-family: 'Montserrat', ui-sans-serif, system-ui, apple-system, BlinkMacSystemFont;
+  }
+</style>
+<body>
 
   <!-- Navbar -->
   <header class="bg-white shadow">
@@ -64,7 +75,7 @@
   </header>
 
   <main role="main">
-    @yield('maincontent')
+    @yield("maincontent")
   </main>
   <!-- Footer -->
   <footer class="text-white pt-10" style="background-color: #003207ff;">
