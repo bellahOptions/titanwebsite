@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Titan Real Estate</title>
+  <title> @hasSection('title')
+            @yield('title') | Titan and Equity Resources Limited
+        @else
+            Bellah Options
+        @endif</title>
   @vite(['resources/css/app.css', 'resources/css/app.css'])
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <script src="https://cdn.tailwindcss.com"></script>
@@ -16,6 +20,7 @@
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 </head>
 <style type="text/css">
   *{
@@ -25,54 +30,89 @@
 <body>
 
   <!-- Navbar -->
-  <header class="bg-white shadow">
+<header class="bg-white shadow">
     <div class="container mx-auto flex items-center justify-between px-4 py-4">
-      <!-- Logo -->
-      <a href="#" class="text-xl font-bold text-green-900">Titan Logo</a>
+        <!-- Logo -->
+        <a href="{{ url('/') }}" class="text-xl font-bold text-green-900">Titan Logo</a>
 
-      <!-- Desktop Menu -->
-      <nav class="hidden md:flex items-center space-x-6">
-        <a href="#" class="text-gray-700 hover:text-green-700">Home</a>
-        <a href="#" class="text-gray-700 hover:text-green-700">About Us</a>
+        <!-- Desktop Menu -->
+        <nav class="hidden md:flex items-center space-x-6">
+            <a href="{{ route('home') }}" class="text-gray-700 hover:text-green-700 {{ request()->routeIs('home') ? 'font-bold text-green-700' : '' }}">
+                Home
+            </a>
+            <a href="{{ route('about') }}" class="text-gray-700 hover:text-green-700 {{ request()->routeIs('about') ? 'font-bold text-green-700' : '' }}">
+                About Us
+            </a>
+              <!-- Properties -->
+    <a href="{{ route('properties.index') }}" class="text-gray-700 hover:text-green-700 {{ request()->routeIs('properties.index') ? 'font-bold text-green-700' : '' }}">
+        Properties
+    </a>
 
-        <!-- Dropdown -->
-        <div class="relative group">
-          <button class="text-gray-700 hover:text-green-700 flex items-center">
-            Our Services <i class="bi bi-chevron-down ml-1 text-sm"></i>
-          </button>
-          <div class="absolute left-0 mt-2 hidden w-40 bg-white shadow-lg rounded-md group-hover:block">
-            <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Property Management</a>
-            <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Shortlet</a>
-            <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Land Sales</a>
-            <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">Property Sales</a>
-          </div>
-        </div>
+<!-- Dropdown (Click to Toggle) -->
+<div x-data="{ open: false }" class="relative z-50"> <!-- Added z-50 -->
+    <button 
+        @click="open = !open" 
+        class="text-gray-700 hover:text-green-700 flex items-center"
+    >
+        Our Services 
+        <i class="bi bi-chevron-down ml-1 text-sm"></i>
+    </button>
 
-        <!-- CTA -->
-        <a href="#" class="px-4 py-2 bg-green-700 text-white rounded-lg shadow hover:bg-green-800 transition">
-          Book Now
-        </a>
-      </nav>
+    <div 
+        x-show="open" 
+        @click.away="open = false" 
+        x-transition 
+        class="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md z-50"
+    >
+        <a href="{{ route('services.property') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Property Management</a>
+        <a href="{{ route('services.shortlet') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Shortlet</a>
+        <a href="{{ route('services.land') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Land Sales</a>
+        <a href="{{ route('services.propertysales') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Property Sales</a>
+    </div>
+</div>
 
-      <!-- Mobile Menu Button -->
-      <button id="menuBtn" class="md:hidden text-gray-700">
-        <i class="bi bi-list text-2xl"></i>
-      </button>
+
+            <!-- CTA -->
+            <a href="{{ route('book') }}" class="px-4 py-2 bg-green-700 text-white rounded-lg shadow hover:bg-green-800 transition">
+                Book Now
+            </a>
+        </nav>
+
+        <!-- Mobile Menu Button -->
+        <button id="menuBtn" class="md:hidden text-gray-700">
+            <i class="bi bi-list text-2xl"></i>
+        </button>
     </div>
 
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="hidden md:hidden bg-gray-100 px-4 py-3 space-y-2">
-      <a href="#" class="block text-gray-700 hover:text-green-700">Home</a>
-      <a href="#" class="block text-gray-700 hover:text-green-700">About Us</a>
-      <a href="#" class="block text-gray-700 hover:text-green-700">Property Management</a>
-      <a href="#" class="block text-gray-700 hover:text-green-700">Shortlet</a>
-      <a href="#" class="block text-gray-700 hover:text-green-700">Land Sales</a>
-      <a href="#" class="block text-gray-700 hover:text-green-700">Property Sales</a>
-      <a href="#" class="block px-4 py-2 bg-green-700 text-white rounded-lg shadow hover:bg-green-800 transition">
-        Book Now
-      </a>
+        <a href="{{ route('home') }}" class="block text-gray-700 hover:text-green-700">Home</a>
+        <a href="{{ route('about') }}" class="block text-gray-700 hover:text-green-700">About Us</a>
+        <a href="{{ route('properties.index') }}" class="block text-gray-700 hover:text-green-700">Properties</a>
+        <!-- Mobile Dropdown (flat links for simplicity) -->
+        <div>
+            <span class="block text-gray-800 font-semibold mt-2">Services</span>
+            <a href="{{ route('services.property') }}" class="block pl-4 text-gray-700 hover:text-green-700">Property Management</a>
+            <a href="{{ route('services.shortlet') }}" class="block pl-4 text-gray-700 hover:text-green-700">Shortlet</a>
+            <a href="{{ route('services.land') }}" class="block pl-4 text-gray-700 hover:text-green-700">Land Sales</a>
+            <a href="{{ route('services.propertysales') }}" class="block pl-4 text-gray-700 hover:text-green-700">Property Sales</a>
+        </div>
+
+        <a href="{{ route('book') }}" class="block px-4 py-2 bg-green-700 text-white rounded-lg shadow hover:bg-green-800 transition">
+            Book Now
+        </a>
     </div>
-  </header>
+</header>
+
+<!-- Mobile Toggle Script -->
+<script>
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    menuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+</script>
 
   <main role="main">
     @yield("maincontent")
@@ -169,6 +209,13 @@
         640: { slidesPerView: 2 },
         1024: { slidesPerView: 4 }
       }
+    });
+  </script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>
+    AOS.init({
+      duration: 1000, // animation duration (ms)
+      once: true      // run only once
     });
   </script>
 </body>
