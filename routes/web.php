@@ -4,7 +4,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Admin\BlogController;
 
 // Main pages
 Route::get('/', function () {
@@ -58,13 +58,6 @@ Route::get('/properties', [PropertyController::class, 'index'])->name('propertie
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
 
-Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
-});
-Route::middleware(['auth', 'is_admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-});
-
 // Properties listing page
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
 
@@ -80,11 +73,16 @@ Route::get('/admin/login', function () {
 // Admin login submit
 Route::post('/admin/login', [App\Http\Controllers\AdminController::class, 'login'])->name('admin.login.submit');
 
-// Admin routes
-Route::get('admin/login', [AdminController::class, 'loginForm'])->name('admin.login');
-Route::post('admin/login', [AdminController::class, 'login'])->name('admin.login.submit');
-Route::get('admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-Route::post('admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
+Route::prefix('admin')->middleware(['auth', 'is_admin'])->group(function () {
+    Route::get('/blogs', [BlogController::class, 'index'])->name('admin.blogs');
+    Route::get('/blogs/create', [BlogController::class, 'create'])->name('admin.blogs.create');
+    Route::post('/blogs', [BlogController::class, 'store'])->name('admin.blogs.store');
+    Route::get('/blogs/{blog}/edit', [BlogController::class, 'edit'])->name('admin.blogs.edit');
+    Route::put('/blogs/{blog}', [BlogController::class, 'update'])->name('admin.blogs.update');
+    Route::delete('/blogs/{blog}', [BlogController::class, 'destroy'])->name('admin.blogs.destroy');
+});
+
 
 
 require __DIR__ . '/auth.php';
+require __DIR__.'/admin.php';
