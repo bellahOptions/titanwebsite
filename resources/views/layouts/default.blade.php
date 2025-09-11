@@ -70,7 +70,9 @@
         <a href="{{ route('services.propertysales') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Property Sales</a>
     </div>
 </div>
-
+<a href="{{ route('blog') }}" class="text-gray-700 hover:text-green-700 {{ request()->routeIs('about') ? 'font-bold text-green-700' : '' }}">
+                Blog & News
+            </a>
 
             <!-- CTA -->
             <a href="{{ route('book') }}" class="px-4 py-2 bg-green-700 text-white rounded-lg shadow hover:bg-green-800 transition">

@@ -124,13 +124,17 @@
   </div>
 </section>
 
-<!--How it works-->
+<!-- How it works -->
 <section class="w-full py-12 bg-gray-50" data-aos="fade-up">
-  <h2 class="text-3xl font-bold text-center mb-10" data-aos="fade-up">Your Property Journey Made Easy</h2>
-  <div class="flex items-center justify-between relative" data-aos="zoom-in">
+  <h2 class="text-3xl font-bold text-center mb-10" data-aos="fade-up">
+    Your Property Journey Made Easy
+  </h2>
+
+  <!-- Steps Wrapper -->
+  <div class="flex flex-col md:flex-row items-center md:justify-between relative space-y-10 md:space-y-0" data-aos="zoom-in">
       
       <!-- Step 1 -->
-      <div class="flex flex-col items-center w-1/3 text-center">
+      <div class="flex flex-col items-center w-full md:w-1/3 text-center">
         <div class="w-16 h-16 flex items-center justify-center bg-green-600 text-white rounded-full text-xl font-bold shadow-lg">
           1
         </div>
@@ -139,7 +143,7 @@
       </div>
 
       <!-- Arrow -->
-      <div class="flex-1 flex justify-center relative">
+      <div class="hidden md:flex flex-1 justify-center relative">
         <div class="w-20 h-1 bg-green-300 relative overflow-hidden">
           <div class="absolute left-0 top-0 h-full w-full bg-green-600 animate-slide"></div>
         </div>
@@ -149,7 +153,7 @@
       </div>
 
       <!-- Step 2 -->
-      <div class="flex flex-col items-center w-1/3 text-center">
+      <div class="flex flex-col items-center w-full md:w-1/3 text-center">
         <div class="w-16 h-16 flex items-center justify-center bg-green-600 text-white rounded-full text-xl font-bold shadow-lg">
           2
         </div>
@@ -158,7 +162,7 @@
       </div>
 
       <!-- Arrow -->
-      <div class="flex-1 flex justify-center relative">
+      <div class="hidden md:flex flex-1 justify-center relative">
         <div class="w-20 h-1 bg-green-300 relative overflow-hidden">
           <div class="absolute left-0 top-0 h-full w-full bg-green-600 animate-slide"></div>
         </div>
@@ -168,7 +172,7 @@
       </div>
 
       <!-- Step 3 -->
-      <div class="flex flex-col items-center w-1/3 text-center">
+      <div class="flex flex-col items-center w-full md:w-1/3 text-center">
         <div class="w-16 h-16 flex items-center justify-center bg-green-600 text-white rounded-full text-xl font-bold shadow-lg">
           3
         </div>
@@ -177,8 +181,8 @@
       </div>
 
     </div>
-  </div>
 </section>
+
 <!-- Call to Action Section -->
 <section class="w-full bg-green-600 py-16 my-20 text-white text-center" data-aos="zoom-in">
   <div class="max-w-4xl mx-auto px-4">

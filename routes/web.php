@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\BlogDisplayController;
 
 // Main pages
 Route::get('/', function () {
@@ -19,6 +20,8 @@ Route::get('/book', function () {
     return view('book');
 })->name('book');
 
+Route::get('/blog', [BlogDisplayController::class, 'index'])->name('blog');
+Route::get('/blog_show/{slug}', [BlogDisplayController::class, 'show'])->name('blogs.show');
 // Services
 Route::prefix('services')->group(function () {
     Route::get('/property-management', function () {
