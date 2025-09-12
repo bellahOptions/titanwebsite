@@ -15,12 +15,10 @@
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap"
     rel="stylesheet">
   <link rel="icon" type="icon" href="{{ asset('images/icon.jpg') }}">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
-    rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <style type="text/css">
   *{
@@ -33,7 +31,7 @@
 <header class="bg-white shadow">
     <div class="container mx-auto flex items-center justify-between px-4 py-4">
         <!-- Logo -->
-        <a href="{{ url('/') }}" class="text-xl font-bold text-green-900">Titan Logo</a>
+        <a href="{{ url('/') }}" class="px-5"><img src="https://titansresources.com/wp-content/uploads/2025/07/tITAN-cREATIVES-03.png" width="150" /></a>
 
         <!-- Desktop Menu -->
         <nav class="hidden md:flex items-center space-x-6">
@@ -53,6 +51,7 @@
     <button 
         @click="open = !open" 
         class="text-gray-700 hover:text-green-700 flex items-center"
+        id="drop-button" 
     >
         Our Services 
         <i class="bi bi-chevron-down ml-1 text-sm"></i>
@@ -63,6 +62,7 @@
         @click.away="open = false" 
         x-transition 
         class="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md z-50"
+        id="drop-menu" 
     >
         <a href="{{ route('services.property') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Property Management</a>
         <a href="{{ route('services.shortlet') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Shortlet</a>
@@ -105,16 +105,17 @@
         </a>
     </div>
 </header>
-
-<!-- Mobile Toggle Script -->
-<script>
-    const menuBtn = document.getElementById('menuBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-
-    menuBtn.addEventListener('click', () => {
-        mobileMenu.classList.toggle('hidden');
-    });
-</script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $("#drop-menu").hide();
+      $("#drop-button").click(function(){        
+      $("#drop-menu").show();
+      });
+      $("#drop-button").mouseleave(function(){        
+      $("#drop-menu").hide();
+      });
+    })
+  </script>
 
   <main role="main">
     @yield("maincontent")
@@ -183,15 +184,16 @@
     </div>
   </footer>
 
-  <!-- Mobile Menu Toggle Script -->
-  <script>
-    const menuBtn = document.getElementById("menuBtn");
-    const mobileMenu = document.getElementById("mobileMenu");
+<!-- Mobile Toggle Script -->
+<script>
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
 
-    menuBtn.addEventListener("click", () => {
-      mobileMenu.classList.toggle("hidden");
+    menuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
     });
-  </script>
+</script>
+
   <!-- SwiperJS Script -->
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script>
