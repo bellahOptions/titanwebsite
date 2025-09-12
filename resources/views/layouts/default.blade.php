@@ -31,6 +31,7 @@
 <header class="bg-white shadow">
     <div class="container mx-auto flex items-center justify-between px-4 py-4">
         <!-- Logo -->
+         <a href="{{ route('home') }}" class="text-xl font-bold text-green-900"><img src="https://titansresources.com/wp-content/uploads/2025/07/tITAN-cREATIVES-03.png" width="150"/></a>
 
 
         <!-- Desktop Menu -->
