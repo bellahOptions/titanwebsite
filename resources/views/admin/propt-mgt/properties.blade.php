@@ -12,6 +12,7 @@
         <table class="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow">
             <thead class="bg-gray-200 dark:bg-gray-700">
                 <tr>
+                    <th class="p-4 text-left">Image</th>
                     <th class="p-4 text-left">Name</th>
                     <th class="p-4 text-left">Price</th>
                     <th class="p-4 text-left">Type</th>
@@ -21,15 +22,17 @@
             <tbody>
                 @foreach($properties as $property)
                 <tr class="border-b border-gray-200 dark:border-gray-700">
+                    <td class="p-4"><img src="{{ $property->image }}" width="30"></td>
                     <td class="p-4">{{ $property->name }}</td>
                     <td class="p-4">${{ number_format($property->listing_price,2) }}</td>
                     <td class="p-4">{{ $property->property_type }}</td>
                     <td class="p-4 flex space-x-2 justify-center">
                         <a href="{{ route('admin.properties.edit',$property->id) }}" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-white">Edit</a>
-                        <form method="POST" action="{{ route('admin.properties.destroy',$property->id) }}">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="px-3 py-1 bg-red-600 hover:bg-red-500 rounded text-white">Delete</button>
-                        </form>
+                        <form action="{{ route('admin.properties.destroy', $property->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this property?');">
+    @csrf
+    @method('DELETE')
+    <button type="submit" class="text-white bg-red-500 px-3 py-1 hover:bg-red-900 rounded text-white hover:underline">Delete</button>
+</form>
                     </td>
                 </tr>
                 @endforeach

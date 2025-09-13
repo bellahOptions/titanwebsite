@@ -8,14 +8,14 @@
     <!-- Header -->
     <div class="flex justify-between items-center">
         <h1 class="text-3xl font-bold">Dashboard</h1>
-        <span class="text-gray-500 dark:text-gray-400">Welcome back, Admin!</span>
+        <span class="text-gray-500 dark:text-gray-400">Welcome back, {{ Auth::user()->name }}</span>
     </div>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow hover:shadow-lg transition">
             <h2 class="font-semibold text-lg">Daily Visitors</h2>
-            <p class="mt-2 text-2xl">{{ $dailyVisitors ?? 0 }}</p>
+            <p class="mt-2 text-2xl">0</p>
         </div>
         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow hover:shadow-lg transition">
             <h2 class="font-semibold text-lg">Most Viewed Property</h2>

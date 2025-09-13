@@ -25,7 +25,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     @foreach ($properties as $property)
         <div class="bg-white rounded-lg shadow overflow-hidden">
-            <img src="{{ $property->image }}" alt="Property" class="w-full h-48 object-cover">
+            <img src="{{ $property->featured_image }}" alt="Property" class="w-full h-48 object-cover">
             <div class="p-4">
                 <h3 class="font-semibold text-lg">{{ $property->name }}</h3>
                 <p class="text-gray-600 text-sm">{{ $property->address }}</p>
@@ -36,10 +36,10 @@
     @endforeach
 </div>
 
-<!-- Pagination -->
 <div class="mt-6">
     {{ $properties->links() }}
 </div>
+
 
         </main>
     </div>

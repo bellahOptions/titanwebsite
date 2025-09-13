@@ -2,18 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\Admin\BlogController;
 
 // All admin routes here
 //Admin Funtions
-// Admin routes
-Route::get('admin/login', [AdminController::class, 'loginForm'])->name('admin.login');
-Route::post('admin/login', [AdminController::class, 'login'])->name('admin.login.submit');
-Route::get('admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-Route::post('admin/logout', [AdminController::class, 'logout'])->name('admin.logout');
-
 
 Route::middleware(['auth', 'is_admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 });
 Route::middleware(['auth', 'is_admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
@@ -22,30 +18,28 @@ Route::middleware(['auth', 'is_admin'])->group(function () {
 
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])->group(function () {
-    Route::get('dashboard', [\App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
+    Route::get('dashboard', [AdminController::class, 'index'])->name('dashboard');
 
     // Users management
-    Route::get('users', [\App\Http\Controllers\Admin\AdminController::class, 'users'])->name('users');
-    Route::post('users/ban/{id}', [\App\Http\Controllers\Admin\AdminController::class, 'banUser'])->name('users.ban');
+    Route::get('users', [AdminController::class, 'users'])->name('users');
+    Route::post('users/ban/{id}', [AdminController::class, 'banUser'])->name('users.ban');
 
+    Route::resource('properties', PropertyController::class);
     // Properties management
-    Route::get('properties', [\App\Http\Controllers\Admin\AdminController::class, 'properties'])->name('properties');
-    Route::get('properties/create', [\App\Http\Controllers\Admin\AdminController::class, 'createProperty'])->name('properties.create');
-    Route::post('properties', [\App\Http\Controllers\Admin\AdminController::class, 'storeProperty'])->name('properties.store');
-    Route::get('properties/edit/{id}', [\App\Http\Controllers\Admin\AdminController::class, 'editProperty'])->name('properties.edit');
-    Route::put('properties/{id}', [\App\Http\Controllers\Admin\AdminController::class, 'updateProperty'])->name('properties.update');
-    Route::delete('properties/{id}', [\App\Http\Controllers\Admin\AdminController::class, 'destroyProperty'])->name('properties.destroy');
+    Route::get('properties', [PropertyController::class, 'properties'])->name('properties.mgt');
+    Route::get('propt-mgt/create-property', [PropertyController::class, 'createProperty'])->name('properties.create');
+    Route::post('properties/save', [PropertyController::class, 'storeProperty'])->name('properties.store');
+    Route::get('properties/edit/{id}', [PropertyController::class, 'editProperty'])->name('properties.edit');
+    Route::put('properties/{id}', [PropertyController::class, 'updateProperty'])->name('properties.update');
+    Route::delete('properties/{id}', [PropertyController::class, 'destroyProperty'])->name('properties.destroy');
 
-    // Other settings
-    Route::get('settings', [\App\Http\Controllers\Admin\AdminController::class, 'settings'])->name('settings');
-    Route::post('settings', [\App\Http\Controllers\Admin\AdminController::class, 'updateSettings'])->name('settings.update');
+    // Blogs
+    Route::get('blogs', [BlogController::class, 'index'])->name('admin.blogs');
+    Route::get('blogs/create-blog', [BlogController::class, 'create'])->name('admin.blogs.create');
+    Route::post('blogs', [BlogController::class, 'store'])->name('admin.blogs.store');
+    Route::get('blogs/{blog}/edit', [BlogController::class, 'edit'])->name('admin.blogs.edit');
+    Route::put('blogs/{blog}', [BlogController::class, 'update'])->name('admin.blogs.update');
+    Route::delete('blogs/{blog}', [BlogController::class, 'destroy'])->name('admin.blogs.destroy');
 
-    // Testimonials
-    Route::get('testimonials', [\App\Http\Controllers\Admin\AdminController::class, 'testimonials'])->name('testimonials');
-    Route::post('testimonials', [\App\Http\Controllers\Admin\AdminController::class, 'addTestimonial'])->name('testimonials.add');
-});
-
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'is_admin'])->group(function () {
-    Route::get('/contact', [App\Http\Controllers\Admin\ContactController::class, 'index'])->name('contact');
 });
 
