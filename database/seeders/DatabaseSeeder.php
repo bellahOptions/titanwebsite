@@ -2,9 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Blog;
+use App\Models\Property;
+use App\Models\Review;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,15 +16,41 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Create admin user
+        User::create([
+            'name' => 'Admin User',
+            'email' => 'admin@titan-equity.com',
+            'password' => Hash::make('password'),
+            'is_admin' => true,
+            'email_verified_at' => now(),
         ]);
+
+        // Create regular users (19 more users)
+        User::factory(19)->create();
+
+        // Create 6 blog posts
+        Blog::factory(6)->create();
+
+        // Create 6 properties
+        $properties = Property::factory(6)->create();
+
+        // Create reviews for properties (3-5 reviews per property)
+        foreach ($properties as $property) {
+            Review::factory(rand(3, 5))->create([ // Changed $this->faker to rand()
+                'property_id' => $property->id,
+            ]);
+        }
+
+        // Create some featured properties
+        Property::factory(2)->featured()->create();
+
+        // Create additional reviews for variety
+        Review::factory(10)->create();
+
+        // Call other seeders if needed
         $this->call([
-        AdminUserSeeder::class,
-        // other seeders...
-    ]);
+            // AdminUserSeeder::class,
+            // other seeders...
+        ]);
     }
 }

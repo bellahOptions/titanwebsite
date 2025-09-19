@@ -40,6 +40,10 @@ Route::get('/admin-secret-register', [AdminAuthController::class, 'showRegistrat
 Route::post('/admin-secret-register', [AdminAuthController::class, 'register']);
 Route::post('/admin-secret-logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
+//Comments
+Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
 // Authenticated user routes (regular users)
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
@@ -59,11 +63,18 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+// Reviews
+Route::post('/properties/{property}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
 // Admin protected routes - SIMPLIFIED AND CORRECTED
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     // Add admin check to the controller instead of using closure middleware
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Reviews
+    Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews.index');
+    Route::patch('/reviews/{review}/approve', [AdminController::class, 'approveReview'])->name('reviews.approve');
     
     // Admin-only routes (these will check for admin in their controllers)
     Route::resource('properties', PropertyController::class)->except(['show', 'index', 'show']);

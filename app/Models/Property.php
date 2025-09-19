@@ -160,4 +160,25 @@ class Property extends Model
     {
         return $query->where('bathrooms', '>=', $bathrooms);
     }
+
+    // Review mgt
+public function reviews()
+{
+    return $this->hasMany(Review::class);
+}
+
+public function approvedReviews()
+{
+    return $this->hasMany(Review::class)->approved();
+}
+
+public function averageRating()
+{
+    return $this->approvedReviews()->avg('rating') ?: 0;
+}
+
+public function totalReviews()
+{
+    return $this->approvedReviews()->count();
+}
 }

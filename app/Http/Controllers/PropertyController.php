@@ -132,7 +132,17 @@ class PropertyController extends Controller
             ->take(4)
             ->get();
 
-        return view('properties.show', compact('property', 'relatedProperties'));
+              // Eager load relationships to avoid N+1 queries
+    $property->load(['user', 'reviews.user']);
+    
+    // Get similar properties
+    $similarProperties = Property::where('type', $property->type)
+        ->where('id', '!=', $property->id)
+        ->active()
+        ->limit(4)
+        ->get();
+
+    return view('properties.show', compact('property', 'similarProperties'));
     }
 
     /**

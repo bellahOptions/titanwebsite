@@ -60,7 +60,113 @@
                             @endif
                         </div>
                     </div>
+                        <!-- Reviews Section -->
+<div class="mt-12">
+    <h3 class="text-2xl font-semibold mb-6">Reviews</h3>
+    
+    <!-- Overall Rating -->
+    <div class="bg-white rounded-lg shadow p-6 mb-6">
+        <div class="flex items-center justify-between">
+            <div>
+                <h4 class="text-lg font-semibold">Overall Rating</h4>
+                <x-star-rating :rating="$property->averageRating()" size="lg" />
+                <p class="text-gray-600 mt-2">{{ $property->totalReviews() }} reviews</p>
+            </div>
+            
+            <!-- Add Review Button -->
+            @auth
+                @if(!auth()->user()->hasReviewed($property))
+                    <button onclick="document.getElementById('review-form').classList.toggle('hidden')"
+                            class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                        Write a Review
+                    </button>
+                @endif
+            @else
+                <a href="{{ route('login') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                    Login to Review
+                </a>
+            @endauth
+        </div>
+    </div>
 
+    <!-- Review Form -->
+    @auth
+        @if(!auth()->user()->reviews->contains('property_id', $property->id))
+            <div id="review-form" class="hidden bg-white rounded-lg shadow p-6 mb-6">
+                <h4 class="text-lg font-semibold mb-4">Write a Review</h4>
+                <form action="{{ route('reviews.store', $property) }}" method="POST">
+                    @csrf
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                        <div class="flex space-x-1">
+                            @for($i = 1; $i <= 5; $i++)
+                                <button type="button" onclick="setRating({{ $i }})" class="text-2xl">
+                                    <span class="rating-star" data-rating="{{ $i }}">☆</span>
+                                </button>
+                            @endfor
+                        </div>
+                        <input type="hidden" name="rating" id="rating" value="0" required>
+                        @error('rating')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="comment" class="block text-sm font-medium text-gray-700 mb-2">Review</label>
+                        <textarea name="comment" id="comment" rows="4" 
+                                 class="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                 placeholder="Share your experience with this property..." required></textarea>
+                        @error('comment')
+                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="flex space-x-3">
+                        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                            Submit Review
+                        </button>
+                        <button type="button" onclick="document.getElementById('review-form').classList.add('hidden')"
+                                class="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <script>
+                function setRating(rating) {
+                    document.getElementById('rating').value = rating;
+                    const stars = document.querySelectorAll('.rating-star');
+                    stars.forEach((star, index) => {
+                        star.textContent = index < rating ? '★' : '☆';
+                        star.className = index < rating ? 'rating-star text-yellow-400' : 'rating-star text-gray-300';
+                    });
+                }
+            </script>
+        @endif
+    @endauth
+
+    <!-- Reviews List -->
+    <div class="space-y-6">
+        @forelse($property->approvedReviews()->recent()->get() as $review)
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h5 class="font-semibold">{{ $review->user->name }}</h5>
+                        <x-star-rating :rating="$review->rating" size="sm" />
+                        <p class="text-gray-500 text-sm">{{ $review->created_at->format('M d, Y') }}</p>
+                    </div>
+                </div>
+                <p class="mt-3 text-gray-700">{{ $review->comment }}</p>
+            </div>
+        @empty
+            <div class="bg-white rounded-lg shadow p-6 text-center">
+                <p class="text-gray-500">No reviews yet. Be the first to review this property!</p>
+            </div>
+        @endforelse
+    </div>
+</div>
                     <!-- Gallery Images -->
                     @if(count($property->gallery_images) > 0)
                         <div class="mb-8">
