@@ -3,10 +3,10 @@
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('About Us') }}
         </h2>
-    </x-slot>
+    </x-slot> 
 
     <!-- Hero Section -->
-    <section class="relative py-20 bg-primary-700 dark:bg-primary-800">
+    <section class="relative py-20 bg-green-700 dark:bg-primary-800">
         <div class="container mx-auto px-4 text-center">
             <h1 class="text-4xl md:text-5xl font-bold text-white mb-6">About Titan & Equity Resources</h1>
             <p class="text-xl text-primary-100 max-w-3xl mx-auto">Architects of opportunity and builders of legacy</p>

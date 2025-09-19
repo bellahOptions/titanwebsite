@@ -15,14 +15,16 @@ class Property extends Model
         'description',
         'price',
         'location',
+        'address',
+        'latitude',
+        'longitude',
         'type',
         'bedrooms',
         'bathrooms',
         'area',
         'images',
         'featured',
-        'status',
-        'user_id'
+        'status'
     ];
 
     protected $casts = [
@@ -31,6 +33,8 @@ class Property extends Model
         'status' => 'boolean',
         'price' => 'decimal:2',
     ];
+
+    protected $appends = ['map_url'];
 
     /**
      * Get the user that owns the property.
@@ -65,6 +69,40 @@ class Property extends Model
             get: fn ($value) => json_decode($value, true) ?? [],
             set: fn ($value) => json_encode($value),
         );
+    }
+
+    /**
+     * Get the map URL attribute.
+     */
+    public function getMapUrlAttribute()
+    {
+        if ($this->latitude && $this->longitude) {
+            return "https://www.google.com/maps?q={$this->latitude},{$this->longitude}";
+        }
+        
+        if ($this->address) {
+            return "https://www.google.com/maps/search/?api=1&query=" . urlencode($this->address);
+        }
+        
+        return "https://www.google.com/maps/search/?api=1&query=" . urlencode($this->location);
+    }
+
+    /**
+     * Get featured image
+     */
+    public function getFeaturedImageAttribute()
+    {
+        $images = $this->images;
+        return !empty($images) ? $images[0] : null;
+    }
+
+    /**
+     * Get gallery images (all except first)
+     */
+    public function getGalleryImagesAttribute()
+    {
+        $images = $this->images;
+        return count($images) > 1 ? array_slice($images, 1) : [];
     }
 
     /**

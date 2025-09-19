@@ -60,7 +60,7 @@ class PropertyController extends Controller
     public function create()
     {
         $propertyTypes = ['sale' => 'For Sale', 'rent' => 'For Rent', 'lease' => 'For Lease'];
-        return view('properties.create', compact('propertyTypes'));
+        return view('admin.properties.create', compact('propertyTypes'));
     }
 
     /**
@@ -147,81 +147,65 @@ class PropertyController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(PropertyRequest $request, Property $property)
+    public function update(Request $request, Property $property)
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'type' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'location' => 'required|string|max:255',
-            'type' => 'required|in:sale,rent,lease',
+            'address' => 'nullable|string|max:255',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'description' => 'nullable|string',
             'bedrooms' => 'nullable|integer|min:0',
-            'bathrooms' => 'nullable|integer|min:0',
-            'area' => 'nullable|integer|min:0',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'bathrooms' => 'nullable|numeric|min:0',
+            'area' => 'nullable|numeric|min:0',
+            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'featured' => 'nullable|boolean',
-            'status' => 'nullable|boolean',
-            'remove_images' => 'nullable|array',
-            'remove_images.*' => 'string',
+            'status' => 'required|boolean'
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+        $imagePaths = $property->images ?? [];
+
+        // Update featured image
+        if ($request->hasFile('featured_image')) {
+            // Delete old featured image if exists
+            if (!empty($imagePaths)) {
+                Storage::disk('public')->delete($imagePaths[0]);
+                array_shift($imagePaths); // Remove old featured image
+            }
+
+            $featuredImagePath = $request->file('featured_image')->store('properties', 'public');
+            array_unshift($imagePaths, $featuredImagePath); // Add new featured image at beginning
         }
 
-        $propertyData = $validator->validated();
+        // Add new gallery images
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $image) {
+                $galleryImagePath = $image->store('properties', 'public');
+                $imagePaths[] = $galleryImagePath;
+            }
+        }
+
+        // Update property
+        $propertyData = $validated;
+        $propertyData['images'] = $imagePaths;
         $propertyData['featured'] = $request->has('featured');
-        $propertyData['status'] = $request->has('status');
-
-        // Handle removal of images
-        if ($request->has('remove_images')) {
-            $currentImages = $property->images ?? [];
-            $imagesToRemove = $request->input('remove_images');
-            
-            foreach ($imagesToRemove as $imageToRemove) {
-                // Remove from storage
-                if (Storage::disk('public')->exists($imageToRemove)) {
-                    Storage::disk('public')->delete($imageToRemove);
-                }
-                
-                // Remove from array
-                $currentImages = array_filter($currentImages, function($image) use ($imageToRemove) {
-                    return $image !== $imageToRemove;
-                });
-            }
-            
-            $propertyData['images'] = array_values($currentImages);
-        }
-
-        // Handle new image uploads
-        if ($request->hasFile('images')) {
-            $currentImages = $property->images ?? [];
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('properties', 'public');
-                $currentImages[] = $path;
-            }
-            $propertyData['images'] = $currentImages;
-        }
 
         $property->update($propertyData);
 
-        return redirect()->route('admin.properties.index')
+        return redirect()->route('properties.index')
             ->with('success', 'Property updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Property $property)
     {
-        // Delete associated images
+        // Delete all images
         if (!empty($property->images)) {
-            foreach ($property->images as $image) {
-                if (Storage::disk('public')->exists($image)) {
-                    Storage::disk('public')->delete($image);
-                }
+            foreach ($property->images as $imagePath) {
+                Storage::disk('public')->delete($imagePath);
             }
         }
 
@@ -230,6 +214,27 @@ class PropertyController extends Controller
         return redirect()->route('admin.properties.index')
             ->with('success', 'Property deleted successfully.');
     }
+
+    public function deleteImage(Property $property, $imageIndex)
+    {
+        $images = $property->images;
+        
+        if (isset($images[$imageIndex])) {
+            // Delete the image file
+            Storage::disk('public')->delete($images[$imageIndex]);
+            
+            // Remove the image from the array
+            array_splice($images, $imageIndex, 1);
+            
+            // Update the property
+            $property->update(['images' => $images]);
+            
+            return back()->with('success', 'Image deleted successfully.');
+        }
+
+        return back()->with('error', 'Image not found.');
+    }
+
 
     /**
      * Toggle featured status of a property.

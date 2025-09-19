@@ -76,15 +76,17 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::post('/blogs/upload-image', [BlogController::class, 'uploadImage'])->name('blogs.upload-image');
     
     // Additional admin routes
-    Route::post('/properties/', [PropertyController::class, 'index'])->name('properties.index');
+    Route::post('/properties/', [PropertyController::class, 'index'])->name('properties.index'); 
+    Route::post('/properties/store', [PropertyController::class, 'store'])->name('properties.store');
     Route::post('/properties/{property}/toggle-featured', [PropertyController::class, 'toggleFeatured'])->name('properties.toggle-featured');
     Route::post('/properties/{property}/toggle-status', [PropertyController::class, 'toggleStatus'])->name('properties.toggle-status');
 
-
+Route::resource('properties', PropertyController::class);
+Route::delete('properties/{property}/delete-image/{imageIndex}', [PropertyController::class, 'deleteImage'])->name('properties.delete-image');
 
     Route::post('/blogs/store', [BlogController::class, 'store'])->name('blogs.store');
 
-    Route::post('/blogs/', [BlogController::class, 'create'])->name('blogs.create');
+    Route::post('/blogs/', [BlogController::class, 'create'])->name('blogs.create'); 
     Route::post('/blogs/', [BlogController::class, 'index'])->name('blog.index');
     
     // User management

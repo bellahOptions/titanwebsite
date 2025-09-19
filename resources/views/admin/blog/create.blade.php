@@ -42,9 +42,7 @@
                         <!-- Content -->
                         <div>
                             <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Content *</label>
-                            <textarea name="content" id="editor" rows="12" required 
-                                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('content') }}</textarea>
-                        </div>
+                            <textarea name="content" id="editor" rows="12" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">{{ old('content') }}</textarea>
 
                         <!-- Image Upload -->
                         <div>
@@ -85,66 +83,25 @@
                 </form>
             </div>
         </div>
-    </div>
+    </div> 
 </div>
-@push('styles')
-<style>
-    .ck-editor__editable {
-        min-height: 300px;
-    }
-</style>
-@endpush
-@push('styles')
-<style>
-    .ck-editor__editable {
-        min-height: 300px;
-    }
-    .ck-content {
-        min-height: 300px;
-    }
-</style>
-@endpush
-@push('scripts')
-<script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
+<script src="https://cdn.tiny.cloud/1/x190tv6zsi1yvgsqf5idvi0gkbwjph9lbjyi1uxb8wzj91mm/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 <script>
-    ClassicEditor
-        .create(document.querySelector('#editor-container'), {
-            ckfinder: {
-                uploadUrl: '{{ route('admin.blogs.upload-image') }}?command=QuickUpload&type=Images&responseType=json'
-            },
-            toolbar: {
-                items: [
-                    'heading', '|',
-                    'bold', 'italic', 'underline', 'strikethrough', '|',
-                    'link', 'insertImage', 'mediaEmbed', '|',
-                    'bulletedList', 'numberedList', '|',
-                    'outdent', 'indent', '|',
-                    'blockQuote', 'insertTable', '|',
-                    'undo', 'redo', '|',
-                    'fontSize', 'fontFamily', 'fontColor', 'fontBackgroundColor'
-                ]
-            },
-            image: {
-                toolbar: [
-                    'imageStyle:inline',
-                    'imageStyle:block',
-                    'imageStyle:wrapText',
-                    '|',
-                    'toggleImageCaption',
-                    'imageTextAlternative'
-                ]
-            }
-        })
-        .then(editor => {
-            editor.model.document.on('change:data', () => {
-                document.querySelector('#editor').value = editor.getData();
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize TinyMCE
+    tinymce.init({
+        selector: '#editor',
+        plugins: 'advlist autolink lists link image charmap preview anchor',
+        toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
+        height: 400,
+        setup: function (editor) {
+            editor.on('change', function () {
+                editor.save();
             });
-        })
-        .catch(error => {
-            console.error(error);
-        });
-</script>
-@endpush
+        }
+    });
+});
+</script> 
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {

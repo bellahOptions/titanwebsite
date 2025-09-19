@@ -6,9 +6,8 @@
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('home') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-primary-600 dark:text-primary-400" />
-                    </a>
-                    <span class="ml-2 text-xl font-semibold text-gray-900 dark:text-white">Titan & Equity</span>
+                        <img src="https://titansresources.com/wp-content/uploads/2025/07/tITAN-cREATIVES-03.png" class="block h-9 w-auto" height="9" />
+                    </a> 
                 </div>
 
                 <!-- Navigation Links -->

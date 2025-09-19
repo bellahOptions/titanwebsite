@@ -25,7 +25,7 @@
 
             @if(auth()->check() && auth()->user()->isAdmin())
                 <div class="mb-6 flex justify-end">
-                    <a href="{{ route('admin.blog.create') }}" class="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300">
+                    <a href="{{ route('admin.blogs.create') }}" class="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300">
                         Create New Post
                     </a>
                 </div>
@@ -74,8 +74,8 @@
                                 
                                 @if(auth()->check() && auth()->user()->isAdmin())
                                     <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600 flex justify-between text-sm">
-                                        <a href="{{ route('admin.blog.edit', $blog) }}" class="text-indigo-600 hover:text-indigo-900 dark:hover:text-indigo-400">Edit</a>
-                                        <form action="{{ route('admin.blog.destroy', $blog) }}" method="POST" class="inline">
+                                        <a href="{{ route('admin.blogs.edit', $blog) }}" class="text-indigo-600 hover:text-indigo-900 dark:hover:text-indigo-400">Edit</a>
+                                        <form action="{{ route('admin.blogs.destroy', $blog) }}" method="POST" class="inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-900 dark:hover:text-red-400" onclick="return confirm('Are you sure you want to delete this post?')">Delete</button>
