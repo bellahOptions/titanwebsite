@@ -1,12 +1,51 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }" class="bg-white justify-center align-center dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+    <!--Top contact-->
+    <style type="text/css">
+
+        .swiper-pagination, 
+        .swiper-pagination-clickable,
+        .swiper-pagination-bullet, 
+        .swiper-pagination-bullet-active {
+    color: green;
+}
+.swiper-button-next, .swiper-button-prev{
+        color: green;
+} 
+        @media (max-width: 480px){
+        #top-nav{
+            display: none
+        }
+    }
+    /*Tablet*/
+    @media (max-width: 768px){
+        #top-nav{
+            padding: 10px;
+        }
+        #top-nav >span{
+            width: auto;
+            margin: 0px 10px;
+            font-size: auto;
+            margin: 0;
+            padding: 5px;
+        }
+        #top-contact{
+            font-size: 5pt;
+        }
+    }
+    </style>
+    <div class="flex justify-between bg-green-900 text-white py-3 px-10 w-full align-center" id="top-nav">
+        <span class="mx-10 text-sm block"><i class="fas fa-envelope mx-2 text-yellow-500"></i> titanrealtyltd@gmail.com</span>
+        <span class="mx-10 text-sm block"><i class="fas fa-map mx-2 text-yellow-500"></i> 9 Olaoye Segun Str, Ibeju-Lekki, Lagos</span>
+        <span class="mx-10 text-sm block"><i class="fas fa-phone mx-2 text-yellow-500"></i>+2349115008562</span>
+    </div>
     <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-4 py-2 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('home') }}">
-                        <img src="https://titansresources.com/wp-content/uploads/2025/07/tITAN-cREATIVES-03.png" class="block h-9 w-auto" height="9" />
+                        <img src="{{ asset('images/titan-color.svg')}}" class="block h-9 w-auto" height="9" />
                     </a> 
                 </div>
 
@@ -33,7 +72,7 @@
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ml-6">
                 <!-- Dark mode toggle -->
-                <button onclick="toggleDarkMode()" class="p-2 bg-green-500 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none">
+                <button onclick="toggleDarkMode()" class="p-2 bg-green-500 rounded-full text-gray-500 dark:text-green-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none">
                     <svg x-show="!dark" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                     </svg>
@@ -67,10 +106,11 @@
                             <x-dropdown-link :href="route('wishlist.index')">
                                 {{ __('Wishlist') }}
                             </x-dropdown-link>
+                            @if(auth()->check() && auth()->user()->is_admin)
                             <x-dropdown-link :href="route('bookings.index')">
                                 {{ __('My Bookings') }}
                             </x-dropdown-link>
-                            
+                            @endif
                             <!-- Authentication -->
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf

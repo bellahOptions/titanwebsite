@@ -1,10 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-.swiper-pagination{
-	color: green;
+@import '@fortawesome/fontawesome-free/css/all.css';
+*{
+	font-family: "Montserrat", sans-serif;
+	font-weight: 500;
 }
-.swiper-button-next, .swiper-button-prev{
-		color: green;
+
+h1, h2, h3, h4, h5, h6{
+	font-family: "Poppins", sans-serif;
+}
+.nav-link{
+	border-bottom: green solid 1px;
+}
+
+a{
+	color: green;
 }
