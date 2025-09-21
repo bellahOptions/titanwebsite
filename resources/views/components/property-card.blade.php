@@ -13,12 +13,16 @@
     <div class="p-4">
         <div class="flex justify-between items-start mb-2">
             <h3 class="text-lg font-semibold text-gray-900">{{ $property->title }}</h3>
-            <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full">
+            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
                 {{ ucfirst($property->type) }}
             </span>
         </div>
-        
+        <div class="flex items-center self-center text-gray-500 dark:text-gray-400">
+        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                                </svg>
         <p class="text-gray-600 text-sm mb-3">{{ $property->location }}</p>
+    </div>
         
         <!-- Star Rating -->
         @if($property->totalReviews() > 0)
@@ -29,7 +33,7 @@
         @endif
         
         <div class="flex justify-between items-center mb-3">
-            <span class="text-2xl font-bold text-indigo-600">${{ number_format($property->price) }}</span>
+            <span class="text-2xl font-bold text-green-600">₦{{ number_format($property->price) }}<small>NGN</small></span>
             <div class="text-sm text-gray-500">
                 {{ $property->bedrooms }} BD / {{ $property->bathrooms }} BA
                 @if($property->area)
@@ -39,7 +43,7 @@
         </div>
         
         <a href="{{ route('properties.show', $property) }}" 
-           class="w-full bg-indigo-600 text-white text-center py-2 rounded-lg hover:bg-indigo-700 transition-colors block">
+           class="w-full bg-green-600 text-white text-center py-2 rounded-lg hover:bg-green-800 transition-colors block">
             View Details
         </a>
     </div>

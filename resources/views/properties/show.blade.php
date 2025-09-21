@@ -12,11 +12,13 @@
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-lg font-semibold">{{ $property->title }}</h3>
                         <div class="flex space-x-2">
+                            @if(auth()->check() && auth()->user()->is_admin)
                             <x-secondary-button>
                                 <a href="{{ route('admin.properties.edit', $property->id) }}" class="flex items-center">
                                     <i class="fas fa-edit mr-2"></i> Edit
                                 </a>
                             </x-secondary-button>
+                            @endif
                             <x-secondary-button>
                                 <a href="{{ route('properties.index') }}" class="flex items-center">
                                     <i class="fas fa-arrow-left mr-2"></i> Back
@@ -49,7 +51,7 @@
                                 @endif
                             </div>
                             <a href="{{ $property->map_url }}" target="_blank" 
-                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                               class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
                                 <i class="fas fa-map-marker-alt mr-2"></i>
                                 View on Google Maps
                             </a>
@@ -82,7 +84,7 @@
                     </button>
                 @endif
             @else
-                <a href="{{ route('login') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                <a href="{{ route('login') }}" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
                     Login to Review
                 </a>
             @endauth
@@ -96,7 +98,7 @@
                 <h4 class="text-lg font-semibold mb-4">Write a Review</h4>
                 <form action="{{ route('reviews.store', $property) }}" method="POST">
                     @csrf
-                    
+                    @method('POST')
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
                         <div class="flex space-x-1">
@@ -197,7 +199,7 @@
                     @endif
 
                     <!-- Property Details -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="grid py-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h4 class="text-sm font-medium text-gray-500">Type</h4>
                             <p class="mt-1 text-gray-900">{{ ucfirst($property->type) }}</p>
@@ -213,7 +215,7 @@
                         
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h4 class="text-sm font-medium text-gray-500">Price</h4>
-                            <p class="mt-1 text-gray-900">${{ number_format($property->price, 2) }}</p>
+                            <p class="mt-1 text-gray-900">₦{{ number_format($property->price, 2) }}</p>
                         </div>
                         
                         <div class="bg-gray-50 p-4 rounded-lg">

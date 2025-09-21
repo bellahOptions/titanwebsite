@@ -34,8 +34,8 @@ class ReviewController extends Controller
             'approved' => false // Requires admin approval
         ]);
 
-        return redirect()->back()
-            ->with('success', 'Review submitted successfully. It will be visible after approval.');
+        return redirect()->route('properties.show', $property)
+        ->with('success', 'Review submitted successfully. It will be visible after approval.');
     }
 
     public function destroy(Review $review)

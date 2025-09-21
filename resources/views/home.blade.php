@@ -71,38 +71,12 @@
             <div class="text-center mb-12">
                 <h2 class="text-3xl font-bold text-green-900 dark:text-white mb-4">Featured Properties</h2>
                 <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">Discover our handpicked selection of premium properties</p>
-            </div>
+            </div> 
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($featuredProperties as $property)
-                <div class="bg-white dark:bg-gray-700 rounded-lg overflow-hidden shadow-lg transition-transform duration-300 hover:scale-105">
-                    <img src="{{ $property->images[0] ?? 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80' }}" 
-                         alt="{{ $property->title }}" class="w-full h-48 object-cover">
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">{{ $property->title }}</h3>
-                            <span class="bg-primary-100 text-primary-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-primary-900 dark:text-primary-300">{{ $property->type }}</span>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-300 mb-4">{{ Str::limit($property->description, 100) }}</p>
-                        <div class="flex justify-between items-center mb-4">
-                            <div class="text-2xl font-bold text-primary-600 dark:text-primary-400">${{ number_format($property->price) }}</div>
-                            <div class="flex items-center text-gray-500 dark:text-gray-400">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                                </svg>
-                                {{ $property->location }}
-                            </div>
-                        </div>
-                        <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-4">
-                            <span>{{ $property->bedrooms }} Bedrooms</span>
-                            <span>{{ $property->bathrooms }} Bathrooms</span>
-                            <span>{{ $property->area }} sq ft</span>
-                        </div>
-                        <a href="{{ route('properties.show', $property) }}" class="block w-full bg-primary-600 hover:bg-primary-700 text-white text-center font-medium py-2 px-4 rounded-lg transition duration-300">
-                            View Details
-                        </a>
-                    </div>
-                </div>
+                @include('components.property-card')
+               
                 @endforeach
             </div>
             
@@ -251,7 +225,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @foreach($latestBlogs as $blog)
                 <div class="bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
-                    <img src="{{ $blog->image ?? 'https://images.unsplash.com/photo-1542435503-956c469947f6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80' }}" 
+                    <img src="{{ $blog->image ??  'https://images.unsplash.com/photo-1542435503-956c469947f6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1974&q=80' }}" 
                          alt="{{ $blog->title }}" class="w-full h-48 object-cover">
                     <div class="p-6">
                         <div class="text-sm text-primary-600 dark:text-primary-400 mb-2">{{ $blog->published_at->format('M d, Y') }}</div>
@@ -282,7 +256,7 @@
     <!-- CTA Section -->
     <section class="py-16 bg-primary-700 dark:bg-primary-800">
         <div class="container mx-auto px-4 text-center">
-            <h2 class="text-3xl text-green-500 font-bold text-white mb-6">Ready to Find Your Dream Property?</h2>
+            <h2 class="text-3xl text-green-500 font-bold text-green-600 mb-6">Ready to Find Your Dream Property?</h2>
             <p class="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">Get in touch with our experts today and let us help you find the perfect property</p>
             <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <a href="{{ route('properties.index') }}" class="bg-green-600 text-white hover:bg-gray-100 font-medium py-3 px-8 rounded-lg transition duration-300">
