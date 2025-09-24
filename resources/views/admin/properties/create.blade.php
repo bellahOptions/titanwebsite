@@ -9,6 +9,31 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
+                    @if($errors->any())
+                        <div class="bg-red-400 border border-red-800 text-red-600 rounded-lg mb-4 p-2">
+                            <strong>Your submission encountered the following error(s)</strong>
+                            <ul>
+                            @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                        </div>
+                    @endif
+
+                    @if(session('success'))
+                    <div
+                        x-data="{show: true}"
+                        x-show="show"
+                        x-transition
+                        x-init="setTimeout(() => show = false, 5000)"
+                     class="bg-green-400 border border-green-800 text-green-600 rounded-lg mb-4 p-2">
+                            {{ session('success')}}
+                    </div>
+                    <script type="text/javascript">
+                        alert('{{ session('success')}}');
+                    </script>
+                    @endif
+
                     <form action="{{ route('admin.properties.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
@@ -25,10 +50,9 @@
                                 <x-input-label for="type" :value="__('Property Type *')" />
                                 <select id="type" name="type" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
                                     <option value="">Select Type</option>
-                                    <option value="sale" {{ old('type') == 'house' ? 'selected' : '' }}>For Sale</option>
-                                    <option value="rent" {{ old('type') == 'apartment' ? 'selected' : '' }}>Rentals (Shortlet)</option>
-                                    <option value="lease" {{ old('type') == 'condo' ? 'selected' : '' }}>Lease</option>
-                                    <option value="villa" {{ old('type') == 'villa' ? 'selected' : '' }}>Villa</option>
+                                    <option value="sale" {{ old('type') == 'sale' ? 'selected' : '' }}>For Sale</option>
+                                    <option value="rent" {{ old('type') == 'rent' ? 'selected' : '' }}>Rentals (Shortlet)</option>
+                                    <option value="lease" {{ old('type') == 'lease' ? 'selected' : '' }}>Lease</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('type')" class="mt-2" />
                             </div>

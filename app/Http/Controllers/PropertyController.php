@@ -105,7 +105,7 @@ class PropertyController extends Controller
 
         Property::create($propertyData);
 
-        return redirect()->route('admin.properties.index')
+        return redirect()->back()
             ->with('success', 'Property created successfully.');
     }
 
@@ -269,4 +269,13 @@ class PropertyController extends Controller
         return redirect()->back()
             ->with('success', 'Property status updated successfully.');
     }
+    public function bookings()
+{
+    return $this->hasMany(Booking::class);
+}
+
+public function availableForInspection()
+{
+    return $this->status && $this->user_id !== auth()->id();
+}
 }

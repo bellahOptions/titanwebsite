@@ -61,11 +61,44 @@
                                 </p>
                             @endif
                         </div>
+<!-- Booking Button -->
+@auth
+    @if($property->availableForInspection())
+        <div class="mt-6">
+            @php
+                $availableDaysCount = \App\Models\InspectionDay::where('is_available', true)->count();
+            @endphp
+            
+            @if($availableDaysCount > 0)
+                <a href="{{ route('bookings.create', $property) }}" 
+                   class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 inline-flex items-center">
+                    <i class="fas fa-calendar-check mr-2"></i>
+                    Book Inspection
+                </a>
+            @else
+                <button disabled class="bg-gray-400 text-white px-6 py-3 rounded-lg inline-flex items-center cursor-not-allowed">
+                    <i class="fas fa-calendar-times mr-2"></i>
+                    Inspections Unavailable
+                </button>
+                <p class="text-sm text-gray-500 mt-2">No inspection days configured by administrator.</p>
+            @endif
+        </div>
+    @endif
+@else
+    <div class="mt-6">
+        <a href="{{ route('login') }}" 
+           class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 inline-flex items-center">
+            <i class="fas fa-calendar-check mr-2"></i>
+            Login to Book Inspection
+        </a>
+    </div>
+@endauth
                     </div>
+
                         <!-- Reviews Section -->
-<div class="mt-12">
-    <h3 class="text-2xl font-semibold mb-6">Reviews</h3>
-    
+<div class="flex flex-row space-x-3">
+<div class="mt-12 w-full">
+    <h3 class="text-2xl font-semibold mb-6">Reviews</h3>    
     <!-- Overall Rating -->
     <div class="bg-white rounded-lg shadow p-6 mb-6">
         <div class="flex items-center justify-between">
@@ -168,6 +201,74 @@
             </div>
         @endforelse
     </div>
+</div>
+
+
+
+<div class="purchae w-full">
+                        <!-- Buy/Rent Section -->
+<div class="mt-8  bg-white rounded-lg shadow p-6">
+    <h3 class="text-xl font-semibold mb-4">Interested in this property?</h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @if($property->canBePurchased())
+            <div class="text-center w-full p-4 border rounded-lg hover:shadow-md transition-shadow">
+                <h4 class="font-semibold text-lg mb-2">Purchase</h4>
+                <p class="text-gray-600 mb-4">Buy this property for</p>
+                <p class="text-2xl font-bold text-green-600 mb-4">${{ number_format($property->price) }}</p>
+                <button onclick="handlePurchaseAction()" 
+                        class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-semibold">
+                    <i class="fas fa-shopping-cart mr-2"></i>Buy Now
+                </button>
+            </div>
+        @endif
+        
+        @if($property->canBeRented())
+            <div class="text-center w-full p-4 border rounded-lg hover:shadow-md transition-shadow">
+                <h4 class="font-semibold text-lg mb-2">Rent</h4>
+                <p class="text-gray-600 mb-4">Rent this property for</p>
+                <p class="text-2xl font-bold text-blue-600 mb-4">${{ number_format($property->price) }}/month</p>
+                <button onclick="handleRentAction()" 
+                        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                    <i class="fas fa-calendar-alt mr-2"></i>Rent Now
+                </button>
+            </div>
+        @endif
+    </div>
+</div>
+
+<!-- Include Auth Modal -->
+@auth
+    <!-- User is logged in, no modal needed -->
+@else
+    <x-auth-modal 
+        action="purchase or rent" 
+        :redirectUrl="url()->current()" 
+    />
+@endauth
+
+<script>
+    function handlePurchaseAction() {
+        @auth
+            // User is logged in, redirect to checkout
+            window.location.href = "{{ route('purchases.checkout', $property) }}";
+        @else
+            // User is not logged in, show auth modal
+            showAuthModal('purchase', "{{ route('purchases.checkout', $property) }}");
+        @endauth
+    }
+    
+    function handleRentAction() {
+        @auth
+            // User is logged in, redirect to rental form
+            window.location.href = "{{ route('rentals.form', $property) }}";
+        @else
+            // User is not logged in, show auth modal
+            showAuthModal('rent', "{{ route('rentals.form', $property) }}");
+        @endauth
+    }
+</script>
+</div>
 </div>
                     <!-- Gallery Images -->
                     @if(count($property->gallery_images) > 0)

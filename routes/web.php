@@ -10,7 +10,10 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminInspectionController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\RentalController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DarkModeController;
@@ -33,6 +36,20 @@ Route::get('/blog/{blog:slug}', [BlogController::class, 'show'])->name('blog.sho
 
 // Dark mode toggle
 Route::post('/toggle-dark-mode', [DarkModeController::class, 'toggle'])->name('toggle-dark-mode');
+
+// Purchase routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/properties/{property}/purchase/checkout', [PurchaseController::class, 'checkout'])->name('purchases.checkout');
+    Route::post('/properties/{property}/purchase/process', [PurchaseController::class, 'processPurchase'])->name('purchases.process');
+    Route::get('/properties/{property}/purchase/confirmation', [PurchaseController::class, 'confirmation'])->name('purchases.confirmation');
+});
+
+// Rental routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/properties/{property}/rent', [RentalController::class, 'showRentalForm'])->name('rentals.form');
+    Route::post('/properties/{property}/rent/process', [RentalController::class, 'processRental'])->name('rentals.process');
+    Route::get('/properties/{property}/rent/confirmation', [RentalController::class, 'confirmation'])->name('rentals.confirmation');
+});
 
 // Admin auth routes (public)
 Route::get('/admin-secret-login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
@@ -72,6 +89,13 @@ Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     // Add admin check to the controller instead of using closure middleware
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Admin inspection days routes
+    Route::get('/inspection-days', [AdminInspectionController::class, 'index'])->name('inspection-days.index');
+    Route::post('/inspection-days', [AdminInspectionController::class, 'store'])->name('inspection-days.store');
+    Route::put('/inspection-days/{inspectionDay}', [AdminInspectionController::class, 'update'])->name('inspection-days.update');
+    Route::delete('/inspection-days/{inspectionDay}', [AdminInspectionController::class, 'destroy'])->name('inspection-days.destroy');
+
 
     // Reviews
     Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews.index');
@@ -113,5 +137,14 @@ Route::delete('properties/{property}/delete-image/{imageIndex}', [PropertyContro
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings/booking-days', [SettingsController::class, 'updateBookingDays'])->name('settings.booking-days');
 });
+
+// Bookings routes
+Route::middleware(['auth'])->group(function () {
+    Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
+    Route::get('/properties/{property}/bookings/create', [BookingController::class, 'create'])->name('bookings.create');
+    Route::post('/properties/{property}/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+});
+
 
 require __DIR__.'/auth.php';

@@ -181,4 +181,27 @@ public function totalReviews()
 {
     return $this->approvedReviews()->count();
 }
+public function availableForInspection()
+{
+    return $this->status && $this->user_id !== auth()->id();
+}
+public function isForSale()
+{
+    return $this->type === 'sale' || $this->type === 'buy';
+}
+
+public function isForRent()
+{
+    return $this->type === 'rent' || $this->type === 'shortlet';
+}
+
+public function canBePurchased()
+{
+    return $this->isForSale() && $this->status && $this->price > 0;
+}
+
+public function canBeRented()
+{
+    return $this->isForRent() && $this->status && $this->price > 0;
+}
 }

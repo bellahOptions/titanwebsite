@@ -41,10 +41,22 @@
                 @endif
             </div>
         </div>
-        
-        <a href="{{ route('properties.show', $property) }}" 
+        <div class="flex flex-row space-x-4">
+        @if($property->type == 'sale')
+            <a href="{{ route('properties.show', $property) }}" 
+           class="w-full bg-green-600 text-white text-center py-2 rounded-lg hover:bg-green-800 transition-colors block"> Buy Property
+            </a>
+            @else
+            <a href="{{ route('properties.show', $property) }}" 
            class="w-full bg-green-600 text-white text-center py-2 rounded-lg hover:bg-green-800 transition-colors block">
+           Rent/Shortlet
+            </a>
+        @endif
+
+        <a href="{{ route('properties.show', $property) }}" 
+           class=" w-full bg-gray-600 text-white text-center py-2 rounded-lg hover:bg-gray-800 transition-colors block">
             View Details
         </a>
+    </div>
     </div>
 </div>
