@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Rental Confirmation') }}
+            {{ __('Purchase Confirmation') }}
         </h2>
     </x-slot>
 
@@ -22,17 +22,15 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
                         </div>
-                        <h1 class="text-2xl font-bold text-gray-900 mb-2">Rental Booking Confirmed!</h1>
-                        <p class="text-gray-600">Your rental booking has been received and confirmed.</p>
+                        <h1 class="text-2xl font-bold text-gray-900 mb-2">Thank You for Your Purchase!</h1>
+                        <p class="text-gray-600">Your order has been received and is being processed.</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <h3 class="font-semibold mb-2">Booking Details</h3>
-                            <p><strong>Booking Number:</strong> {{ $order->order_number }}</p>
-                            <p><strong>Check-in:</strong> {{ \Carbon\Carbon::parse($order->details['check_in'])->format('F d, Y') }}</p>
-                            <p><strong>Check-out:</strong> {{ \Carbon\Carbon::parse($order->details['check_out'])->format('F d, Y') }}</p>
-                            <p><strong>Guests:</strong> {{ $order->details['guests'] }}</p>
+                            <h3 class="font-semibold mb-2">Order Details</h3>
+                            <p><strong>Order Number:</strong> {{ $order->order_number }}</p>
+                            <p><strong>Date:</strong> {{ $order->created_at->format('F d, Y H:i') }}</p>
                             <p><strong>Status:</strong> 
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full 
                                     {{ $order->status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
@@ -42,28 +40,19 @@
                         </div>
 
                         <div class="bg-gray-50 p-4 rounded-lg">
-                            <h3 class="font-semibold mb-2">Property & Payment</h3>
+                            <h3 class="font-semibold mb-2">Property Details</h3>
                             <p><strong>Property:</strong> {{ $order->property->title }}</p>
                             <p><strong>Location:</strong> {{ $order->property->location }}</p>
-                            <p><strong>Total Amount:</strong> <span class="text-xl font-bold text-green-600">{{ $order->formatted_amount }}</span></p>
-                            <p><strong>Duration:</strong> {{ $order->details['days'] }} nights</p>
+                            <p><strong>Amount:</strong> <span class="text-xl font-bold text-green-600">{{ $order->formatted_amount }}</span></p>
                         </div>
                     </div>
 
-                    @if(!empty($order->details['special_requests']))
-                    <div class="bg-yellow-50 p-4 rounded-lg mb-6">
-                        <h3 class="font-semibold mb-2">Special Requests</h3>
-                        <p class="text-gray-600">{{ $order->details['special_requests'] }}</p>
-                    </div>
-                    @endif
-
                     <div class="bg-blue-50 p-4 rounded-lg mb-6">
-                        <h3 class="font-semibold mb-2">Next Steps</h3>
+                        <h3 class="font-semibold mb-2">What's Next?</h3>
                         <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
                             <li>An invoice has been sent to your email address</li>
-                            <li>You will receive a confirmation call within 12 hours</li>
-                            <li>Payment instructions will be provided by our team</li>
-                            <li>Check-in instructions will be sent 48 hours before arrival</li>
+                            <li>Our team will contact you within 24 hours to proceed with the purchase</li>
+                            <li>You can track your order status in your account dashboard</li>
                         </ul>
                     </div>
 

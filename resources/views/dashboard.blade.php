@@ -10,10 +10,11 @@
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <!--User Dataa-->
                 <div class="p-6 flex flex-row justify-center w-full space-x-5 dark:text-gray-100">
-                    <div class="flex space-x-5 p-10 bg-green-300 rounded-lg w-full">
+                    <a href="{{ route('properties.index') }}" class="flex space-x-5 p-10 bg-green-300 rounded-lg w-full">
+
                             <h1 class="text-green-800 text-4xl"><i class="fa fa-home"></i></h1>
                             <p>Buy/Lease a Property</p>
-                    </div>
+                    </a>
                     <div class="flex space-x-5 p-10 bg-green-800 rounded-lg w-full">
                             <h1 class="text-white text-4xl"><i class="fa fa-ticket"></i></h1>
                             <p class="text-white">Raise a support ticket</p>

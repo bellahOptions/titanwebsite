@@ -20,11 +20,27 @@ use App\Http\Controllers\DarkModeController;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Route;
 
+
+Route::get('/debug-maintenance', function () {
+    $settingsService = app(App\Services\SettingsService::class);
+    
+    return response()->json([
+        'status' => $settingsService->get('status'),
+        'is_maintenance' => $settingsService->isMaintenance(),
+        'is_active' => $settingsService->isActive(),
+        'middleware_working' => 'Check browser network tab for 503 status'
+    ]);
+});
+
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/about', [AboutController::class, 'index'])->name('about');
 Route::get('/services', [ServiceController::class, 'index'])->name('services');
 Route::get('/contact', [ServiceController::class, 'contact'])->name('contact'); // Fixed this to use a contact method
+
+Route::get('/maintenance', function () {
+    return view('maintenance');
+})->name('maintenance.page');
 
 // Property routes (public)
 Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
@@ -68,6 +84,9 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     })->name('dashboard');
     
+    Route::get('/purchases/confirmation/{order}', [PurchaseController::class, 'confirmation'])->name('purchases.confirmation');
+Route::get('properties/{property}/rentals/confirmation/{order}', [RentalController::class, 'confirmation'])->name('rentals.confirmation');
+
     // Wishlist routes
     Route::post('/wishlist/{property}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('wishlist.index');
@@ -90,11 +109,23 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     // Add admin check to the controller instead of using closure middleware
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
 
+        Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('admin.settings');
+    Route::post('/settings', [App\Http\Controllers\SettingsController::class, 'update'])->name('admin.settings.update');
+
+    //orders
+        Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::post('/orders/{order}/mark-paid', [AdminOrderController::class, 'markAsPaid'])->name('orders.mark-paid');
+    Route::patch('/orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+
     // Admin inspection days routes
     Route::get('/inspection-days', [AdminInspectionController::class, 'index'])->name('inspection-days.index');
     Route::post('/inspection-days', [AdminInspectionController::class, 'store'])->name('inspection-days.store');
     Route::put('/inspection-days/{inspectionDay}', [AdminInspectionController::class, 'update'])->name('inspection-days.update');
     Route::delete('/inspection-days/{inspectionDay}', [AdminInspectionController::class, 'destroy'])->name('inspection-days.destroy');
+
+        Route::get('/settings', [App\Http\Controllers\SettingsController::class, 'index'])->name('admin.settings');
+    Route::post('/settings', [App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
 
 
     // Reviews
