@@ -29,9 +29,6 @@
                      class="bg-green-400 border border-green-800 text-green-600 rounded-lg mb-4 p-2">
                             {{ session('success')}}
                     </div>
-                    <script type="text/javascript">
-                        alert('{{ session('success')}}');
-                    </script>
                     @endif
 
                     <form action="{{ route('admin.properties.store') }}" method="POST" enctype="multipart/form-data">
@@ -134,6 +131,7 @@
                             <x-text-input id="featured_image" name="featured_image" type="file" class="mt-1 block w-full" 
                                          accept="image/*" required />
                             <x-input-error :messages="$errors->get('featured_image')" class="mt-2" />
+                            <p class="mt-1 text-sm text-gray-500">This image will be stored securely on Cloudinary CDN</p>
                         </div>
 
                         <!-- Gallery Images -->
@@ -142,7 +140,7 @@
                             <x-text-input id="gallery_images" name="gallery_images[]" type="file" class="mt-1 block w-full" 
                                          accept="image/*" multiple />
                             <x-input-error :messages="$errors->get('gallery_images')" class="mt-2" />
-                            <p class="mt-1 text-sm text-gray-500">Select multiple images for the gallery</p>
+                            <p class="mt-1 text-sm text-gray-500">Select multiple images for the gallery (stored on Cloudinary)</p>
                         </div>
 
                         <!-- Featured & Status -->

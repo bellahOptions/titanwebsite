@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use CloudinaryLabs\CloudinaryLaravel\MediaAlly; // Add this
 
 class Property extends Model
 {
-    use HasFactory;
+    use HasFactory; // Add MediaAlly trait
 
     protected $fillable = [
         'title',
@@ -22,19 +23,17 @@ class Property extends Model
         'bedrooms',
         'bathrooms',
         'area',
-        'images',
         'featured',
         'status'
     ];
 
     protected $casts = [
-        'images' => 'array',
         'featured' => 'boolean',
         'status' => 'boolean',
         'price' => 'decimal:2',
     ];
 
-    protected $appends = ['map_url'];
+    protected $appends = ['map_url', 'featured_image', 'thumbnail']; // Add computed attributes
 
     /**
      * Get the user that owns the property.
@@ -45,30 +44,70 @@ class Property extends Model
     }
 
     /**
-     * Get the bookings for the property.
+     * Get the property images
      */
-    public function bookings()
+    public function images()
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(PropertyImage::class);
     }
 
     /**
-     * Get the wishlists for the property.
+     * Get featured image
      */
-    public function wishlists()
+    public function featuredImage()
     {
-        return $this->hasMany(Wishlist::class);
+        // Return featured image if exists, otherwise first image
+        return $this->images()
+            ->where('is_featured', true)
+            ->first()
+            ?? $this->images()->first();
     }
 
     /**
-     * Interact with the property's images.
+     * Accessor for featured image URL
      */
-    protected function images(): Attribute
+    public function getFeaturedImageAttribute()
     {
-        return Attribute::make(
-            get: fn ($value) => json_decode($value, true) ?? [],
-            set: fn ($value) => json_encode($value),
-        );
+        $featuredImage = $this->featuredImage();
+        return $featuredImage ? $featuredImage->getOptimizedUrl(800, 600) : null;
+    }
+
+
+    /**
+     * Get all images for gallery
+     */
+    public function getGalleryImagesAttribute()
+    {
+        return $this->images()->orderBy('order')->get();
+    }
+
+    // ... rest of your model code remains the same
+    /**
+     * Get optimized image URL with transformations
+     */
+    public function getImageUrl($transformations = [])
+    {
+        $image = $this->getFirstMedia('properties');
+        if ($image) {
+            $defaultTransformations = [
+                'width' => 800,
+                'height' => 600,
+                'crop' => 'limit',
+                'quality' => 'auto'
+            ];
+            
+            $finalTransformations = array_merge($defaultTransformations, $transformations);
+            return $image->getSecureUrl($finalTransformations);
+        }
+        return null;
+    }
+
+    /**
+     * Get thumbnail URL
+     */
+    public function getThumbnailAttribute()
+    {
+        return $this->getImageUrl(['width' => 300, 'height' => 200, 'crop' => 'fill']);
     }
 
     /**
@@ -85,24 +124,6 @@ class Property extends Model
         }
         
         return "https://www.google.com/maps/search/?api=1&query=" . urlencode($this->location);
-    }
-
-    /**
-     * Get featured image
-     */
-    public function getFeaturedImageAttribute()
-    {
-        $images = $this->images;
-        return !empty($images) ? $images[0] : null;
-    }
-
-    /**
-     * Get gallery images (all except first)
-     */
-    public function getGalleryImagesAttribute()
-    {
-        $images = $this->images;
-        return count($images) > 1 ? array_slice($images, 1) : [];
     }
 
     /**
@@ -161,47 +182,49 @@ class Property extends Model
         return $query->where('bathrooms', '>=', $bathrooms);
     }
 
-    // Review mgt
-public function reviews()
-{
-    return $this->hasMany(Review::class);
-}
+    // Review management
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 
-public function approvedReviews()
-{
-    return $this->hasMany(Review::class)->approved();
-}
+    public function approvedReviews()
+    {
+        return $this->hasMany(Review::class)->approved();
+    }
 
-public function averageRating()
-{
-    return $this->approvedReviews()->avg('rating') ?: 0;
-}
+    public function averageRating()
+    {
+        return $this->approvedReviews()->avg('rating') ?: 0;
+    }
 
-public function totalReviews()
-{
-    return $this->approvedReviews()->count();
-}
-public function availableForInspection()
-{
-    return $this->status && $this->user_id !== auth()->id();
-}
-public function isForSale()
-{
-    return $this->type === 'sale' || $this->type === 'buy';
-}
+    public function totalReviews()
+    {
+        return $this->approvedReviews()->count();
+    }
 
-public function isForRent()
-{
-    return $this->type === 'rent' || $this->type === 'shortlet';
-}
+    public function availableForInspection()
+    {
+        return $this->status && $this->user_id !== auth()->id();
+    }
 
-public function canBePurchased()
-{
-    return $this->isForSale() && $this->status && $this->price > 0;
-}
+    public function isForSale()
+    {
+        return $this->type === 'sale' || $this->type === 'buy';
+    }
 
-public function canBeRented()
-{
-    return $this->isForRent() && $this->status && $this->price > 0;
-}
+    public function isForRent()
+    {
+        return $this->type === 'rent' || $this->type === 'shortlet';
+    }
+
+    public function canBePurchased()
+    {
+        return $this->isForSale() && $this->status && $this->price > 0;
+    }
+
+    public function canBeRented()
+    {
+        return $this->isForRent() && $this->status && $this->price > 0;
+    }
 }

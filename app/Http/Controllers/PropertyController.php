@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use App\Models\Property;
+use App\Models\PropertyImage;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use App\Http\Requests\PropertyRequest;
 
 class PropertyController extends Controller
@@ -20,7 +21,7 @@ class PropertyController extends Controller
         $filters = $request->only(['type', 'location', 'min_price', 'max_price', 'bedrooms', 'bathrooms']);
         
         // Start with all active properties
-        $properties = Property::active();
+        $properties = Property::active()->with('images');
         
         // Apply filters
         if (!empty($filters['type'])) {
@@ -77,7 +78,8 @@ class PropertyController extends Controller
             'bedrooms' => 'nullable|integer|min:0',
             'bathrooms' => 'nullable|integer|min:0',
             'area' => 'nullable|integer|min:0',
-            'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'featured_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'featured' => 'nullable|boolean',
             'status' => 'nullable|boolean',
         ]);
@@ -88,25 +90,72 @@ class PropertyController extends Controller
                 ->withInput();
         }
 
-        $propertyData = $validator->validated();
-        $propertyData['user_id'] = auth()->id();
-        $propertyData['featured'] = $request->has('featured');
-        $propertyData['status'] = $request->has('status');
+        DB::beginTransaction();
 
-        // Handle image uploads
-        if ($request->hasFile('images')) {
-            $imagePaths = [];
-            foreach ($request->file('images') as $image) {
-                $path = $image->store('properties', 'public');
-                $imagePaths[] = $path;
+        try {
+            $propertyData = $validator->validated();
+            $propertyData['user_id'] = auth()->id();
+            $propertyData['featured'] = $request->has('featured');
+            $propertyData['status'] = $request->has('status');
+
+            // Create property record
+            $property = Property::create($propertyData);
+
+            // Upload featured image
+            if ($request->hasFile('featured_image')) {
+                $uploadedFile = Cloudinary::upload(
+                    $request->file('featured_image')->getRealPath(),
+                    [
+                        'folder' => 'properties/' . $property->id,
+                        'transformation' => ['width' => 800, 'height' => 600, 'crop' => 'limit']
+                    ]
+                );
+
+                PropertyImage::create([
+                    'property_id' => $property->id,
+                    'cloudinary_public_id' => $uploadedFile->getPublicId(),
+                    'url' => $uploadedFile->getSecurePath(),
+                    'is_featured' => true,
+                    'order' => 0
+                ]);
             }
-            $propertyData['images'] = $imagePaths;
+
+            // Upload gallery images
+            if ($request->hasFile('gallery_images')) {
+                foreach ($request->file('gallery_images') as $index => $image) {
+                    $uploadedFile = Cloudinary::upload(
+                        $image->getRealPath(),
+                        [
+                            'folder' => 'properties/' . $property->id,
+                            'transformation' => ['width' => 800, 'height' => 600, 'crop' => 'limit']
+                        ]
+                    );
+
+                    PropertyImage::create([
+                        'property_id' => $property->id,
+                        'cloudinary_public_id' => $uploadedFile->getPublicId(),
+                        'url' => $uploadedFile->getSecurePath(),
+                        'is_featured' => false,
+                        'order' => $index + 1
+                    ]);
+                }
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.properties.index')
+                ->with('success', 'Property created successfully with Cloudinary image storage.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Log the error for debugging
+            \Log::error('Property creation failed: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Failed to create property: ' . $e->getMessage())
+                ->withInput();
         }
-
-        Property::create($propertyData);
-
-        return redirect()->back()
-            ->with('success', 'Property created successfully.');
     }
 
     /**
@@ -126,23 +175,18 @@ class PropertyController extends Controller
             }
         }
 
-        $relatedProperties = Property::active()
+        // Eager load relationships with images
+        $property->load(['images', 'user', 'reviews.user']);
+        
+        // Get similar properties
+        $similarProperties = Property::where('type', $property->type)
             ->where('id', '!=', $property->id)
-            ->where('type', $property->type)
-            ->take(4)
+            ->active()
+            ->with('images')
+            ->limit(4)
             ->get();
 
-              // Eager load relationships to avoid N+1 queries
-    $property->load(['user', 'reviews.user']);
-    
-    // Get similar properties
-    $similarProperties = Property::where('type', $property->type)
-        ->where('id', '!=', $property->id)
-        ->active()
-        ->limit(4)
-        ->get();
-
-    return view('properties.show', compact('property', 'similarProperties'));
+        return view('properties.show', compact('property', 'similarProperties'));
     }
 
     /**
@@ -151,6 +195,7 @@ class PropertyController extends Controller
     public function edit(Property $property)
     {
         $propertyTypes = ['sale' => 'For Sale', 'rent' => 'For Rent', 'lease' => 'For Lease'];
+        $property->load('images');
         return view('properties.edit', compact('property', 'propertyTypes'));
     }
 
@@ -158,93 +203,100 @@ class PropertyController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, Property $property)
-    {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'type' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'location' => 'required|string|max:255',
-            'address' => 'nullable|string|max:255',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
-            'description' => 'nullable|string',
-            'bedrooms' => 'nullable|integer|min:0',
-            'bathrooms' => 'nullable|numeric|min:0',
-            'area' => 'nullable|numeric|min:0',
-            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'featured' => 'nullable|boolean',
-            'status' => 'required|boolean'
+{
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'type' => 'required|string|max:255',
+        'price' => 'required|numeric|min:0',
+        'location' => 'required|string|max:255',
+        'address' => 'nullable|string|max:255',
+        'latitude' => 'nullable|numeric',
+        'longitude' => 'nullable|numeric',
+        'description' => 'nullable|string',
+        'bedrooms' => 'nullable|integer|min:0',
+        'bathrooms' => 'nullable|numeric|min:0',
+        'area' => 'nullable|numeric|min:0',
+        'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+        'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+        'delete_images' => 'sometimes|array',
+        'featured' => 'nullable|boolean',
+        'status' => 'required|boolean'
+    ]);
+
+    // Update property
+    $property->update($validated);
+
+    // Delete selected images
+    if ($request->has('delete_images')) {
+        foreach ($request->delete_images as $imageId) {
+            $image = PropertyImage::find($imageId);
+            if ($image) {
+                Cloudinary::destroy($image->cloudinary_public_id);
+                $image->delete();
+            }
+        }
+    }
+
+    // Update featured image
+    if ($request->hasFile('featured_image')) {
+        $oldFeatured = $property->images()->where('is_featured', true)->first();
+        if ($oldFeatured) {
+            Cloudinary::destroy($oldFeatured->cloudinary_public_id);
+            $oldFeatured->delete();
+        }
+
+        $uploadedFile = Cloudinary::upload($request->file('featured_image')->getRealPath(), [
+            'folder' => 'properties/' . $property->id,
+            'transformation' => ['width' => 800, 'height' => 600, 'crop' => 'limit']
         ]);
 
-        $imagePaths = $property->images ?? [];
-
-        // Update featured image
-        if ($request->hasFile('featured_image')) {
-            // Delete old featured image if exists
-            if (!empty($imagePaths)) {
-                Storage::disk('public')->delete($imagePaths[0]);
-                array_shift($imagePaths); // Remove old featured image
-            }
-
-            $featuredImagePath = $request->file('featured_image')->store('properties', 'public');
-            array_unshift($imagePaths, $featuredImagePath); // Add new featured image at beginning
-        }
-
-        // Add new gallery images
-        if ($request->hasFile('gallery_images')) {
-            foreach ($request->file('gallery_images') as $image) {
-                $galleryImagePath = $image->store('properties', 'public');
-                $imagePaths[] = $galleryImagePath;
-            }
-        }
-
-        // Update property
-        $propertyData = $validated;
-        $propertyData['images'] = $imagePaths;
-        $propertyData['featured'] = $request->has('featured');
-
-        $property->update($propertyData);
-
-        return redirect()->route('properties.index')
-            ->with('success', 'Property updated successfully.');
+        PropertyImage::create([
+            'property_id' => $property->id,
+            'cloudinary_public_id' => $uploadedFile->getPublicId(),
+            'url' => $uploadedFile->getSecurePath(),
+            'is_featured' => true,
+            'order' => 0
+        ]);
     }
+
+    // Add new gallery images
+    if ($request->hasFile('gallery_images')) {
+        $currentMaxOrder = $property->images()->max('order') ?? 0;
+
+        foreach ($request->file('gallery_images') as $image) {
+            $uploadedFile = Cloudinary::upload($image->getRealPath(), [
+                'folder' => 'properties/' . $property->id,
+                'transformation' => ['width' => 800, 'height' => 600, 'crop' => 'limit']
+            ]);
+
+            PropertyImage::create([
+                'property_id' => $property->id,
+                'cloudinary_public_id' => $uploadedFile->getPublicId(),
+                'url' => $uploadedFile->getSecurePath(),
+                'is_featured' => false,
+                'order' => ++$currentMaxOrder
+            ]);
+        }
+    }
+
+    return redirect()->route('properties.index')
+        ->with('success', 'Property updated successfully with Cloudinary.');
+}
+
 
     public function destroy(Property $property)
     {
-        // Delete all images
-        if (!empty($property->images)) {
-            foreach ($property->images as $imagePath) {
-                Storage::disk('public')->delete($imagePath);
-            }
+        // Delete all images from Cloudinary
+        foreach ($property->images as $image) {
+            Cloudinary::destroy($image->cloudinary_public_id);
         }
 
+        // Delete property (images will be deleted via cascade)
         $property->delete();
 
         return redirect()->route('admin.properties.index')
-            ->with('success', 'Property deleted successfully.');
+            ->with('success', 'Property deleted successfully from Cloudinary and database.');
     }
-
-    public function deleteImage(Property $property, $imageIndex)
-    {
-        $images = $property->images;
-        
-        if (isset($images[$imageIndex])) {
-            // Delete the image file
-            Storage::disk('public')->delete($images[$imageIndex]);
-            
-            // Remove the image from the array
-            array_splice($images, $imageIndex, 1);
-            
-            // Update the property
-            $property->update(['images' => $images]);
-            
-            return back()->with('success', 'Image deleted successfully.');
-        }
-
-        return back()->with('error', 'Image not found.');
-    }
-
 
     /**
      * Toggle featured status of a property.
@@ -269,13 +321,4 @@ class PropertyController extends Controller
         return redirect()->back()
             ->with('success', 'Property status updated successfully.');
     }
-    public function bookings()
-{
-    return $this->hasMany(Booking::class);
-}
-
-public function availableForInspection()
-{
-    return $this->status && $this->user_id !== auth()->id();
-}
 }

@@ -1,15 +1,16 @@
 @props(['property'])
 
 <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-    @if($property->featured_image)
-        <img src="{{ asset('storage/' . $property->featured_image) }}" 
-             alt="{{ $property->title }}" class="w-full h-48 object-cover">
-    @else
-        <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
-            <span class="text-gray-400">No Image</span>
-        </div>
-    @endif
-    
+    @if($property->featuredImage())
+    <img src="{{ $property->featuredImage()->getOptimizedUrl(600, 400) }}" 
+         alt="{{ $property->title }}" 
+         class="w-full h-48 object-cover">
+@else
+    <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+        <span class="text-gray-400">No Image</span>
+    </div>
+@endif
+
     <div class="p-4">
         <div class="flex justify-between items-start mb-2">
             <h3 class="text-lg font-semibold text-gray-900">{{ $property->title }}</h3>

@@ -32,15 +32,6 @@ class CheckMaintenanceMode
             
             return redirect()->route('maintenance.page');
         }
-
-        // If user is logged in, allow access even in maintenance mode
-        if ($this->settingsService->isMaintenance() && auth()->check()) {
-            // Optional: Show a warning message
-            if (!$request->is('admin/*')) {
-                // You can flash a message here if you want
-            }
-        }
-
         return $next($request);
     }
 }
