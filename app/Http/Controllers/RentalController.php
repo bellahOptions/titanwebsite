@@ -63,11 +63,8 @@ class RentalController extends Controller
             ]
         ]);
 
-        // Send emails
-        //Mail::to(Auth::user()->email)->send(new InvoiceEmail($order));
-        //Mail::to(config('mail.admin_email'))->send(new AdminOrderNotification($order));
-
-        // Here you would save the rental booking and process payment
+        Mail::to(Auth::user()->email)->send(new InvoiceEmail($order));
+        Mail::to(config('mail.admin_email'))->send(new AdminOrderNotification($order));
 
         return redirect()->route('rentals.confirmation', $order)
             ->with('success', 'Rental booking completed successfully!');
