@@ -1,0 +1,1 @@
+<img src="{{ asset('images/log-col.svg') }}" width="50">

@@ -1,0 +1,13 @@
+[11-Oct-2025 10:00:49 UTC] PHP Fatal error:  Uncaught RuntimeException: A facade root has not been set. in /home2/bellahop/titan_older/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php:360
+Stack trace:
+#0 Command line code(1): Illuminate\Support\Facades\Facade::__callStatic()
+#1 {main}
+  thrown in /home2/bellahop/titan_older/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php on line 360
+[11-Oct-2025 10:11:13 UTC] PHP Fatal error:  Uncaught Error: Class "Cloudinary" not found in Command line code:1
+Stack trace:
+#0 {main}
+  thrown in Command line code on line 1
+[11-Oct-2025 10:14:27 UTC] PHP Fatal error:  Uncaught Error: Class "Cloudinary" not found in Command line code:1
+Stack trace:
+#0 {main}
+  thrown in Command line code on line 1
