@@ -234,38 +234,15 @@
 
                             <!-- Image Upload -->
                             <div class="space-y-2">
-                                <label for="image_upload" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                                     Update Image
                                 </label>
-                                <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 bg-gray-50 dark:bg-gray-700/50 hover:border-green-400 dark:hover:border-green-500 transition-all duration-200">
-                                    <div class="text-center">
-                                        <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-3" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                        <label for="image_upload" class="cursor-pointer">
-                                            <span class="text-green-600 dark:text-green-400 font-medium hover:text-green-700 dark:hover:text-green-300">Choose a new file</span>
-                                        </label>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG up to 10MB</p>
-                                    </div>
-                                    <input type="file" name="image_upload" id="image_upload" accept="image/*" class="hidden">
-                                </div>
-                                
-                                <button type="button" id="upload_btn"
-                                    class="mt-3 w-full sm:w-auto px-6 py-3 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-green-100 dark:focus:ring-green-900/30">
-                                    Upload New Image
-                                </button>
-
-                                <div id="preview" class="mt-4">
-                                    @if($property->image_url)
-                                        <div id="current_image" class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
-                                            <p class="text-sm font-medium text-blue-700 dark:text-blue-300 mb-3">Current Image:</p>
-                                            <img src="{{ $property->image_url }}" class="w-full max-w-md rounded-lg shadow-md mx-auto">
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <input type="hidden" name="image_url" id="image_url" value="{{ $property->image_url }}">
-                                <input type="hidden" name="public_id" id="public_id" value="{{ $property->public_id }}">
+                                <x-image-uploader
+                                    upload-route="{{ route('admin.properties.upload-image') }}"
+                                    url-field="image_url"
+                                    current-url="{{ $property->image_url }}"
+                                    current-pid="{{ $property->public_id }}"
+                                />
                             </div>
 
                             <!-- Google Drive Link -->
@@ -390,70 +367,6 @@
                 descriptionField.value = quill.root.innerHTML;
             });
 
-            // Cloudinary Upload (keeping original Ajax logic)
-            $('#upload_btn').click(function() {
-                const file = $('#image_upload')[0].files[0];
-                if (!file) {
-                    alert('Please select an image first.');
-                    return;
-                }
-
-                // File size validation (10MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    alert('File size must be less than 10MB.');
-                    return;
-                }
-
-                // File type validation
-                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-                if (!validTypes.includes(file.type)) {
-                    alert('Please upload a valid image file (JPG, PNG, or GIF).');
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', 'unsigned_preset_here'); // Change this!
-
-                $('#upload_btn').html('Uploading...').prop('disabled', true);
-
-                $.ajax({
-                    url: 'https://api.cloudinary.com/v1_1/dgivliz15/image/upload',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(res) {
-                        // Hide the old image section
-                        $('#current_image').fadeOut(300);
-
-                        // Show new uploaded preview
-                        $('#preview').html(`
-                            <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800 animate-fade-in">
-                                <p class="text-sm font-medium text-green-700 dark:text-green-300 mb-3">✓ New Image Uploaded</p>
-                                <img src="${res.secure_url}" class="w-full max-w-md rounded-lg shadow-md mx-auto mb-3">
-                                <p class="text-xs text-gray-600 dark:text-gray-400 break-all">
-                                    <strong>URL:</strong> 
-                                    <a href="${res.secure_url}" target="_blank" class="text-green-600 dark:text-green-400 hover:underline">
-                                        ${res.secure_url}
-                                    </a>
-                                </p>
-                            </div>
-                        `);
-
-                        // Store Cloudinary data
-                        $('#image_url').val(res.secure_url);
-                        $('#public_id').val(res.public_id);
-
-                        $('#upload_btn').html('Upload Complete ✓').prop('disabled', false);
-                    },
-                    error: function(err) {
-                        console.error(err);
-                        alert('⚠️ Upload failed. Please try again.');
-                        $('#upload_btn').html('Upload New Image').prop('disabled', false);
-                    }
-                });
-            });
         });
     </script>
 </x-app-layout>

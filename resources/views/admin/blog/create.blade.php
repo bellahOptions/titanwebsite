@@ -95,36 +95,14 @@
 
                         <!-- Image Upload Section -->
                         <div class="space-y-2">
-                            <label for="image_upload" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                                 Featured Image <span class="text-red-500">*</span>
                             </label>
-                            <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-6 bg-gray-50 dark:bg-gray-700/50 hover:border-green-400 dark:hover:border-green-500 transition-all duration-200">
-                                <div class="text-center">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-3" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    <label for="image_upload" class="cursor-pointer">
-                                        <span class="text-green-600 dark:text-green-400 font-medium hover:text-green-700 dark:hover:text-green-300">Choose a file</span>
-                                        <span class="text-gray-500 dark:text-gray-400"> or drag and drop</span>
-                                    </label>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG, GIF up to 10MB</p>
-                                </div>
-                                <input type="file" id="image_upload" class="hidden" accept="image/*">
-                            </div>
-                            
-                            <button type="button" id="upload_btn"
-                                class="mt-3 w-full sm:w-auto px-6 py-3 bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-green-100 dark:focus:ring-green-900/30">
-                                <span class="flex items-center justify-center">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                                    </svg>
-                                    Upload Image
-                                </span>
-                            </button>
-
-                            <div id="preview" class="mt-4"></div>
-                            <input type="hidden" name="uploaded_image_url" id="image_url">
-                            <input type="hidden" name="public_id" id="public_id">
+                            <x-image-uploader
+                                upload-route="{{ route('admin.blogs.upload-image') }}"
+                                url-field="uploaded_image_url"
+                                :required="true"
+                            />
                         </div>
 
                         <!-- Publishing Options -->
@@ -232,91 +210,6 @@
             }
         });
 
-        // Cloudinary Upload (keeping original Ajax logic)
-        $(document).ready(function() {
-            $('#upload_btn').click(function() {
-                const file = $('#image_upload')[0].files[0];
-                if (!file) {
-                    alert('Please select an image first.');
-                    return;
-                }
-
-                // File size validation (10MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    alert('File size must be less than 10MB.');
-                    return;
-                }
-
-                // File type validation
-                const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-                if (!validTypes.includes(file.type)) {
-                    alert('Please upload a valid image file (JPG, PNG, or GIF).');
-                    return;
-                }
-
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', 'unsigned_preset_here');
-
-                $('#upload_btn').html(`
-                    <span class="flex items-center justify-center">
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Uploading...
-                    </span>
-                `).prop('disabled', true);
-
-                $.ajax({
-                    url: 'https://api.cloudinary.com/v1_1/dgivliz15/image/upload',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(res) {
-                        console.log(res);
-
-                        $('#preview').html(`
-                            <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
-                                <p class="text-sm font-medium text-green-700 dark:text-green-300 mb-3">✓ Upload Successful</p>
-                                <img src="${res.secure_url}" class="w-full max-w-md rounded-lg shadow-md mx-auto mb-3">
-                                <p class="text-xs text-gray-600 dark:text-gray-400 break-all">
-                                    <strong>URL:</strong> 
-                                    <a href="${res.secure_url}" target="_blank" class="text-green-600 dark:text-green-400 hover:underline">
-                                        ${res.secure_url}
-                                    </a>
-                                </p>
-                            </div>
-                        `);
-
-                        $('#image_url').val(res.secure_url);
-                        $('#public_id').val(res.public_id);
-
-                        $('#upload_btn').html(`
-                            <span class="flex items-center justify-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Upload Complete ✓
-                            </span>
-                        `).prop('disabled', false).removeClass('bg-green-600 hover:bg-green-700').addClass('bg-green-500');
-                    },
-                    error: function(err) {
-                        console.error(err);
-                        alert('⚠️ Upload failed. Please try again.');
-                        $('#upload_btn').html(`
-                            <span class="flex items-center justify-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                                </svg>
-                                Upload Image
-                            </span>
-                        `).prop('disabled', false);
-                    }
-                });
-            });
-        });
     </script>
     @endpush
 </x-app-layout>

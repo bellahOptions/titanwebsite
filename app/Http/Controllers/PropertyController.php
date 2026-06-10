@@ -6,7 +6,6 @@ use App\Models\Property;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Requests\PropertyRequest;
-use Symfony\Component\Mime\Part\TextPart;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 
@@ -44,7 +43,7 @@ public function adminIndex()
     // Only allow admins (optional, if you have roles)
     abort_unless(auth()->user()->is_admin, 403);
 
-    $properties = \App\Models\Property::latest()->paginate(10);
+    $properties = Property::latest()->paginate(10);
     
     return view('admin.propt.index', compact('properties'));
 }
@@ -84,18 +83,28 @@ public function store(PropertyRequest $request)
     ]);
 
     try {
-        // ✅ No Cloudinary upload here — use existing AJAX results
         $property = Property::create([
             ...$validated,
             'user_id' => auth()->id(),
             'featured' => $request->boolean('featured'),
             'status' => $request->boolean('status', true),
         ]);
+    } catch (\Exception $e) {
+        \Log::error('Property creation failed', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
 
-        // ✅ Send notification email to admin
+        return back()->withInput()->withErrors([
+            'error' => 'Failed to save property. Please try again.',
+        ]);
+    }
+
+    // Send notification email — failure must NOT block the success redirect
+    try {
         $admin = auth()->user();
         if ($admin && $admin->email) {
-            $subject = '🏡 New Property Added Successfully!';
+            $subject = 'New Property Added Successfully!';
             $htmlContent = '
                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin:auto; border:1px solid #eee; border-radius:10px; overflow:hidden;">
                     <div style="background:#2F855A; color:white; padding:15px 20px;">
@@ -106,42 +115,37 @@ public function store(PropertyRequest $request)
                         <p>Your new property has been added successfully.</p>
                         <table style="width:100%; margin-top:10px; border-collapse:collapse;">
                             <tr><td><strong>Title:</strong></td><td>' . e($property->title) . '</td></tr>
-                            <tr><td><strong>Price:</strong></td><td>₦' . number_format($property->price) . '</td></tr>
+                            <tr><td><strong>Price:</strong></td><td>&#8358;' . number_format($property->price) . '</td></tr>
                             <tr><td><strong>Location:</strong></td><td>' . e($property->location) . '</td></tr>
                             <tr><td><strong>Type:</strong></td><td>' . ucfirst($property->type) . '</td></tr>
                         </table>
                         <p style="margin-top:15px;">
-                            <a href="' . url('/properties/' . $property->id) . '" 
+                            <a href="' . url('/properties/' . $property->id) . '"
                                style="display:inline-block; background:#2F855A; color:white; text-decoration:none; padding:10px 15px; border-radius:5px;">
                                View Property
                             </a>
                         </p>
                     </div>
                     <div style="background:#f7f7f7; text-align:center; padding:10px; font-size:12px; color:#666;">
-                        Titan Real Estate © ' . date('Y') . '
+                        Titan Real Estate &copy; ' . date('Y') . '
                     </div>
                 </div>
             ';
 
             Mail::html($htmlContent, function ($message) use ($admin, $subject) {
-    $message->to($admin->email)
-            ->subject($subject);
-});
+                $message->to($admin->email)->subject($subject);
+            });
         }
-
-        return redirect()
-            ->route('properties.index')
-            ->with('success', 'Property created successfully!');
-    } catch (\Exception $e) {
-        \Log::error('Property creation failed', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
-        ]);
-
-        return back()->withErrors([
-            'error' => 'Failed to save property. Please try again.',
+    } catch (\Exception $mailError) {
+        \Log::warning('Property creation notification email failed', [
+            'property_id' => $property->id,
+            'error' => $mailError->getMessage(),
         ]);
     }
+
+    return redirect()
+        ->route('properties.index')
+        ->with('success', 'Property created successfully!');
 }
 
 /**
@@ -199,14 +203,20 @@ public function edit(Property $property)
             return back()->withErrors(['error' => 'You are not authorized to update this property.']);
         }
 
-        // ✅ If a new image was uploaded via AJAX
+        // If a new image was uploaded via AJAX, replace the old one
         if (!empty($validated['image_url']) && !empty($validated['public_id'])) {
-            // Delete old Cloudinary image (if exists)
-            if ($property->public_id) {
-                \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::destroy($property->public_id);
+            if (!empty($property->public_id)) {
+                try {
+                    if (str_starts_with($property->public_id, 'local:')) {
+                        @unlink(public_path('uploads/properties/' . str_replace('local:', '', $property->public_id)));
+                    } else {
+                        Cloudinary::destroy($property->public_id);
+                    }
+                } catch (\Exception $deleteError) {
+                    \Log::warning('Old image delete failed on update', ['error' => $deleteError->getMessage()]);
+                }
             }
 
-            // Replace with new image details
             $property->image_url = $validated['image_url'];
             $property->public_id = $validated['public_id'];
         }
@@ -290,14 +300,18 @@ public function destroy(Property $property)
                 ->withErrors(['error' => 'You are not authorized to delete this property.']);
         }
 
-        // ✅ Delete image from Cloudinary (only if a public_id exists)
+        // Delete image — local or Cloudinary
         if (!empty($property->public_id)) {
             try {
-                \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::destroy($property->public_id);
-            } catch (\Exception $cloudinaryError) {
-                \Log::warning('Cloudinary delete failed', [
+                if (str_starts_with($property->public_id, 'local:')) {
+                    @unlink(public_path('uploads/properties/' . str_replace('local:', '', $property->public_id)));
+                } else {
+                    Cloudinary::destroy($property->public_id);
+                }
+            } catch (\Exception $deleteError) {
+                \Log::warning('Image delete failed', [
                     'property_id' => $property->id,
-                    'error' => $cloudinaryError->getMessage(),
+                    'error'       => $deleteError->getMessage(),
                 ]);
             }
         }
@@ -323,6 +337,47 @@ public function destroy(Property $property)
   /**
      * Toggle featured status of a property.
      */
+    public function uploadImage(Request $request)
+    {
+        $request->validate(['image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240']);
+
+        try {
+            $result = Cloudinary::upload(
+                $request->file('image')->getRealPath(),
+                ['folder' => 'titan/properties']
+            );
+
+            return response()->json([
+                'success'   => true,
+                'url'       => $result->getSecurePath(),
+                'public_id' => $result->getPublicId(),
+            ]);
+        } catch (\Exception $e) {
+            \Log::warning('Cloudinary upload failed, falling back to local storage', ['error' => $e->getMessage()]);
+
+            try {
+                $file      = $request->file('image');
+                $filename  = uniqid('prop_', true) . '.' . $file->getClientOriginalExtension();
+                $uploadDir = public_path('uploads/properties');
+
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+
+                $file->move($uploadDir, $filename);
+
+                return response()->json([
+                    'success'   => true,
+                    'url'       => asset('uploads/properties/' . $filename),
+                    'public_id' => 'local:' . $filename,
+                ]);
+            } catch (\Exception $localError) {
+                \Log::error('Local image storage also failed', ['error' => $localError->getMessage()]);
+                return response()->json(['success' => false, 'error' => 'Upload failed. Please try again.'], 500);
+            }
+        }
+    }
+
     public function toggleFeatured(Property $property)
     {
         $property->featured = !$property->featured;

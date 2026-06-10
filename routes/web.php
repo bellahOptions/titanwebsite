@@ -137,6 +137,7 @@ Route::middleware(['auth', 'verified', 'admin'])->prefix('admin')->name('admin.'
         return view('admin.propt.index');
     });
     Route::get('/properties/mgt', [PropertyController::class, 'adminIndex'])->name('properties.mgt');
+    Route::post('/properties/upload-image', [PropertyController::class, 'uploadImage'])->name('properties.upload-image');
     Route::post('/properties/{property}/toggle-featured', [PropertyController::class, 'toggleFeatured'])->name('properties.toggle-featured');
     Route::post('/properties/{property}/toggle-status', [PropertyController::class, 'toggleStatus'])->name('properties.toggle-status');
     Route::delete('properties/{property}/delete-image/{imageIndex}', [PropertyController::class, 'deleteImage'])->name('properties.delete-image');
